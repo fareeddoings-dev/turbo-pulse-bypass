@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Turbo Pulse | مسرع الإنترنت</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0a0e14;
+            color: white;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background: #161b22;
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border: 1px solid #30363d;
+            width: 85%;
+            max-width: 400px;
+        }
+        .status-light {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: #333;
+            margin: 10px auto;
+            transition: 0.3s;
+        }
+        .active .status-light {
+            background-color: #238636;
+            box-shadow: 0 0 15px #238636;
+        }
+        button {
+            background-color: #238636;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            border-radius: 10px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+        button:active { transform: scale(0.98); }
+        button.stop { background-color: #da3633; }
+        .log {
+            margin-top: 20px;
+            font-size: 0.8rem;
+            color: #8b949e;
+            height: 50px;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container" id="mainCard">
+        <h1>Turbo Pulse</h1>
+        <p>تخطي تحديد السرعة (المنفذ 8080)</p>
+        
+        <div class="status-light"></div>
+        <h2 id="statusText">متوقف</h2>
+        
+        <button id="actionBtn" onclick="togglePulse()">تشغيل التسريع</button>
+        
+        <div class="log" id="logBox">جاهز للبدء...</div>
+    </div>
+
+    <script>
+        let isRunning = false;
+        let controller;
+
+        async function startPulse() {
+            const url = "https://jed.myspeed.net.sa:8080/speedtest/download?size=25000000";
+            
+            while (isRunning) {
+                try {
+                    const cacheBuster = Math.random();
+                    // محاكاة طلب الاختبار لإيهام النظام
+                    await fetch(`${url}&cb=${cacheBuster}`, {
+                        mode: 'no-cors', // لتجنب مشاكل الحماية بين المواقع
+                        cache: 'no-store',
+                        headers: {
+                            'Referer': 'https://www.speedtest.net/'
+                        }
+                    });
+                    
+                    document.getElementById('logBox').innerText = "تم إرسال النبضة بنجاح √ " + new Date().toLocaleTimeString();
+                } catch (e) {
+                    document.getElementById('logBox').innerText = "خطأ في الاتصال، جارِ المحاولة...";
+                }
+                
+                // انتظار ثانية واحدة قبل النبضة التالية
+                await new Promise(r => setTimeout(r, 1000));
+            }
+        }
+
+        function togglePulse() {
+            const btn = document.getElementById('actionBtn');
+            const card = document.getElementById('mainCard');
+            const status = document.getElementById('statusText');
+
+            if (!isRunning) {
+                isRunning = true;
+                btn.innerText = "إيقاف التسريع";
+                btn.classList.add('stop');
+                card.classList.add('active');
+                status.innerText = "التسريع نشط الآن";
+                startPulse();
+            } else {
+                isRunning = false;
+                btn.innerText = "تشغيل التسريع";
+                btn.classList.remove('stop');
+                card.classList.remove('active');
+                status.innerText = "متوقف";
+                document.getElementById('logBox').innerText = "تم الإيقاف.";
+            }
+        }
+    </script>
+</body>
+</html>
