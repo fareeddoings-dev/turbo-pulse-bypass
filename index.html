@@ -80,29 +80,31 @@
         let controller;
 
         async function startPulse() {
-            const url = "https://jed.myspeed.net.sa:8080/speedtest/download?size=25000000";
+    // هذا الرابط يطلب صورة بدقة عالية من سيرفرات جوجل (تغيير الـ cb يمنع الكاش)
+    const url = "https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png";
+    
+    while (isRunning) {
+        try {
+            const cacheBuster = Math.random();
+            // نرسل 10 طلبات متتالية بسرعة عالية (Flood) لفتح المسار
+            const requests = Array(10).fill().map(() => 
+                fetch(`${url}?cb=${cacheBuster}`, {
+                    mode: 'no-cors',
+                    cache: 'no-store'
+                })
+            );
             
-            while (isRunning) {
-                try {
-                    const cacheBuster = Math.random();
-                    // محاكاة طلب الاختبار لإيهام النظام
-                    await fetch(`${url}&cb=${cacheBuster}`, {
-                        mode: 'no-cors', // لتجنب مشاكل الحماية بين المواقع
-                        cache: 'no-store',
-                        headers: {
-                            'Referer': 'https://www.speedtest.net/'
-                        }
-                    });
-                    
-                    document.getElementById('logBox').innerText = "تم إرسال النبضة بنجاح √ " + new Date().toLocaleTimeString();
-                } catch (e) {
-                    document.getElementById('logBox').innerText = "خطأ في الاتصال، جارِ المحاولة...";
-                }
-                
-                // انتظار ثانية واحدة قبل النبضة التالية
-                await new Promise(r => setTimeout(r, 1000));
-            }
+            await Promise.all(requests);
+            
+            document.getElementById('logBox').innerText = "التسريع نشط عبر سيرفر Google √ " + new Date().toLocaleTimeString();
+        } catch (e) {
+            document.getElementById('logBox').innerText = "محاولة إعادة الاتصال...";
         }
+        
+        // انتظار بسيط جداً لإبقاء الخط مفتوحاً
+        await new Promise(r => setTimeout(r, 500));
+    }
+}
 
         function togglePulse() {
             const btn = document.getElementById('actionBtn');
