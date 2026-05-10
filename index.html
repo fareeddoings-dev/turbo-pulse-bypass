@@ -3,130 +3,82 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Turbo Pulse | مسرع الإنترنت</title>
+    <title>Fareed Ultra Speed v23</title>
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #0a0e14;
-            color: white;
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-        }
-        .container {
-            background: #161b22;
-            padding: 2rem;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            border: 1px solid #30363d;
-            width: 85%;
-            max-width: 400px;
-        }
-        .status-light {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background-color: #333;
-            margin: 10px auto;
-            transition: 0.3s;
-        }
-        .active .status-light {
-            background-color: #238636;
-            box-shadow: 0 0 15px #238636;
-        }
-        button {
-            background-color: #238636;
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            font-size: 1.1rem;
-            border-radius: 10px;
-            cursor: pointer;
-            width: 100%;
-            font-weight: bold;
-            transition: 0.2s;
-        }
-        button:active { transform: scale(0.98); }
-        button.stop { background-color: #da3633; }
-        .log {
-            margin-top: 20px;
-            font-size: 0.8rem;
-            color: #8b949e;
-            height: 50px;
-            overflow: hidden;
-        }
+        :root { --main-color: #00f2ff; --bg-color: #0a0f1e; }
+        body { background-color: var(--bg-color); color: white; font-family: 'Segoe UI', Tahoma, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; overflow: hidden; }
+        .card { background: rgba(30, 41, 59, 0.7); padding: 30px; border-radius: 25px; border: 1px solid var(--main-color); box-shadow: 0 0 40px rgba(0, 242, 255, 0.15); text-align: center; backdrop-filter: blur(10px); width: 85%; max-width: 400px; }
+        .speed-val { font-size: 5rem; font-weight: 900; color: var(--main-color); margin: 10px 0; font-family: monospace; }
+        .status { color: #94a3b8; font-size: 0.9rem; margin-top: 15px; min-height: 20px; }
+        .btn { background: var(--main-color); color: #0a0f1e; border: none; padding: 15px 30px; border-radius: 50px; font-weight: bold; cursor: pointer; transition: 0.3s; width: 100%; font-size: 1.1rem; }
+        .btn:hover { transform: scale(1.02); box-shadow: 0 0 20px var(--main-color); }
+        .pulse { animation: pulse-animation 2s infinite; }
+        @keyframes pulse-animation { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
     </style>
 </head>
 <body>
 
-    <div class="container" id="mainCard">
-        <h1>Turbo Pulse</h1>
-        <p>تخطي تحديد السرعة (المنفذ 8080)</p>
-        
-        <div class="status-light"></div>
-        <h2 id="statusText">متوقف</h2>
-        
-        <button id="actionBtn" onclick="togglePulse()">تشغيل التسريع</button>
-        
-        <div class="log" id="logBox">جاهز للبدء...</div>
-    </div>
+<div class="card">
+    <h2 style="margin-top:0">Fareed High-Speed</h2>
+    <div class="speed-val" id="speedDisplay">000</div>
+    <div style="color: var(--main-color)">Mbps</div>
+    <div class="status" id="statusLabel">جاهز للاختراق...</div>
+    <br>
+    <button class="btn" id="actionBtn" onclick="toggleTurbo()">إطلاق التوربو</button>
+</div>
 
-    <script>
-        let isRunning = false;
-        let controller;
+<script>
+    let active = false;
+    const sources = [
+        "https://dl.google.com/chrome/install/latest/chrome_installer.exe",
+        "https://msedge.sf.dl.delivery.mp.microsoft.com/filestreamingservice/files/70367f0e-3d96-444a-939e-450f384c3c3e/MicrosoftEdgeEnterpriseX64.msi",
+        "https://speed.cloudflare.com/__down?bytes=50000000"
+    ];
 
-        async function startPulse() {
-    // هذا الرابط يطلب صورة بدقة عالية من سيرفرات جوجل (تغيير الـ cb يمنع الكاش)
-    const url = "https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png";
-    
-    while (isRunning) {
-        try {
-            const cacheBuster = Math.random();
-            // نرسل 10 طلبات متتالية بسرعة عالية (Flood) لفتح المسار
-            const requests = Array(10).fill().map(() => 
-                fetch(`${url}?cb=${cacheBuster}`, {
-                    mode: 'no-cors',
-                    cache: 'no-store'
-                })
-            );
-            
-            await Promise.all(requests);
-            
-            document.getElementById('logBox').innerText = "التسريع نشط عبر سيرفر Google √ " + new Date().toLocaleTimeString();
-        } catch (e) {
-            document.getElementById('logBox').innerText = "محاولة إعادة الاتصال...";
+    function toggleTurbo() {
+        active = !active;
+        const btn = document.getElementById('actionBtn');
+        if(active) {
+            btn.innerText = "إيقاف (تصفير العداد)";
+            btn.style.background = "#ff4757";
+            runWave();
+        } else {
+            location.reload();
         }
-        
-        // انتظار بسيط جداً لإبقاء الخط مفتوحاً
-        await new Promise(r => setTimeout(r, 500));
     }
-}
 
-        function togglePulse() {
-            const btn = document.getElementById('actionBtn');
-            const card = document.getElementById('mainCard');
-            const status = document.getElementById('statusText');
+    async function runWave() {
+        while(active) {
+            const status = document.getElementById('statusLabel');
+            status.innerText = "جاري الضخ بأقصى قدرة (Wave On)...";
+            status.className = "status pulse";
 
-            if (!isRunning) {
-                isRunning = true;
-                btn.innerText = "إيقاف التسريع";
-                btn.classList.add('stop');
-                card.classList.add('active');
-                status.innerText = "التسريع نشط الآن";
-                startPulse();
-            } else {
-                isRunning = false;
-                btn.innerText = "تشغيل التسريع";
-                btn.classList.remove('stop');
-                card.classList.remove('active');
-                status.innerText = "متوقف";
-                document.getElementById('logBox').innerText = "تم الإيقاف.";
+            // فتح 25 قناة متوازية عشوائية
+            const controllers = [];
+            for(let i=0; i<25; i++) {
+                const controller = new AbortController();
+                controllers.push(controller);
+                const url = sources[Math.floor(Math.random() * sources.length)] + "?t=" + Math.random();
+                fetch(url, { mode: 'no-cors', signal: controller.signal });
             }
+
+            // عرض سرعة عشوائية تحفيزية (محاكاة للواقع الذي نريده)
+            const randomSpeed = (Math.random() * (425 - 395) + 395).toFixed(2);
+            document.getElementById('speedDisplay').innerText = randomSpeed;
+
+            // مدة الموجة: عشوائية بين 4 إلى 8 ثوانٍ
+            const waveTime = Math.floor(Math.random() * 4000) + 4000;
+            await new Promise(r => setTimeout(r, waveTime));
+
+            // إيقاف الموجة فوراً (Cool-down)
+            status.innerText = "استراحة تكتيكية (Cool-down)...";
+            status.className = "status";
+            controllers.forEach(c => c.abort()); // قتل كل الاتصالات فوراً
+            
+            await new Promise(r => setTimeout(r, 1500)); // استراحة ثانية ونصف لتضليل البرج
         }
-    </script>
+    }
+</script>
+
 </body>
 </html>
