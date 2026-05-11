@@ -1,83 +1,556 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fareed Ultra Speed v23</title>
-    <style>
-        :root { --main-color: #00f2ff; --bg-color: #0a0f1e; }
-        body { background-color: var(--bg-color); color: white; font-family: 'Segoe UI', Tahoma, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; overflow: hidden; }
-        .card { background: rgba(30, 41, 59, 0.7); padding: 30px; border-radius: 25px; border: 1px solid var(--main-color); box-shadow: 0 0 40px rgba(0, 242, 255, 0.15); text-align: center; backdrop-filter: blur(10px); width: 85%; max-width: 400px; }
-        .speed-val { font-size: 5rem; font-weight: 900; color: var(--main-color); margin: 10px 0; font-family: monospace; }
-        .status { color: #94a3b8; font-size: 0.9rem; margin-top: 15px; min-height: 20px; }
-        .btn { background: var(--main-color); color: #0a0f1e; border: none; padding: 15px 30px; border-radius: 50px; font-weight: bold; cursor: pointer; transition: 0.3s; width: 100%; font-size: 1.1rem; }
-        .btn:hover { transform: scale(1.02); box-shadow: 0 0 20px var(--main-color); }
-        .pulse { animation: pulse-animation 2s infinite; }
-        @keyframes pulse-animation { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VOLGA | حلول التبريد والمركبات</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&family=Barlow+Condensed:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --cool-accent:#0e6db5;
+  --cool-dark:#094d82;
+  --cool-bg-hover:#f0f7fd;
+  --veh-accent:#b8620a;
+  --veh-dark:#8a4807;
+  --veh-bg-hover:#fdf8f2;
+  --text-main:#111;
+  --text-dim:#777;
+  --border:#d8d8d8;
+  --font-ar:'Tajawal',sans-serif;
+  --font-en:'Barlow Condensed',sans-serif;
+  --dur:0.55s;
+  --ease:cubic-bezier(.4,0,.2,1);
+}
+
+html,body{height:100%;overflow:hidden}
+body{font-family:var(--font-ar);background:#fff;color:var(--text-main);-webkit-font-smoothing:antialiased}
+
+/* ─── LAYOUT ─────────────────────────────────────── */
+/* dir="rtl" على html يعكس flex تلقائياً:
+   أول عنصر في DOM = يمين الشاشة
+   آخر عنصر في DOM = يسار الشاشة */
+.page{
+  display:flex;
+  height:100vh;
+}
+
+/* ─── DIVIDER ────────────────────────────────────── */
+.divider{
+  background:var(--border);
+  position:relative;
+  flex-shrink:0;
+  /* عرض ثابت للـ transition */
+  width:1px;
+  transition:width var(--dur) var(--ease), opacity calc(var(--dur)*0.5) ease;
+  z-index:100;
+}
+
+.page.expanded-cool .divider,
+.page.expanded-veh  .divider{
+  width:0;
+  opacity:0;
+}
+
+/* ─── LANG BTN — في منتصف الـ divider ───────────── */
+#langBtn{
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  background:#fff;
+  border:1px solid #ccc;
+  color:#444;
+  font-family:var(--font-en);
+  font-size:11px;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  padding:8px 18px;
+  border-radius:40px;
+  cursor:pointer;
+  white-space:nowrap;
+  transition:background .2s, opacity .3s;
+  box-shadow:0 2px 8px rgba(0,0,0,.09);
+}
+#langBtn:hover{background:#f0f0f0}
+
+.page.expanded-cool .divider #langBtn,
+.page.expanded-veh  .divider #langBtn{
+  opacity:0;
+  pointer-events:none;
+}
+
+/* ─── SECTIONS ───────────────────────────────────── */
+.sec{
+  /* كل قسم يأخذ نصف العرض */
+  width:50%;
+  max-width:50%;
+  flex-shrink:0;
+  position:relative;
+  overflow:hidden;
+  display:flex;
+  cursor:pointer;
+  /* الـ transition على max-width تعمل بشكل سلس في flex */
+  transition:max-width var(--dur) var(--ease), width var(--dur) var(--ease);
+}
+
+/* Expand: cool يتوسع لليسار */
+.page.expanded-cool .cool{max-width:100%;width:100%}
+.page.expanded-cool .veh {max-width:0;   width:0}
+
+/* Expand: veh يتوسع لليمين */
+.page.expanded-veh .veh {max-width:100%;width:100%}
+.page.expanded-veh .cool{max-width:0;   width:0}
+
+/* بعد الـ expand، الـ section الموسَّع لا يستجيب للهوفر */
+.page.expanded-cool .cool,
+.page.expanded-veh  .veh{cursor:default}
+
+/* ─── SEC MAIN (المحتوى الرئيسي) ─────────────────── */
+.sec-main{
+  width:100%;
+  min-width:340px;        /* يمنع تشوه المحتوى أثناء الـ animation */
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding:56px;
+  position:relative;      /* للـ ::after arrow */
+  transition:opacity .25s ease, background .35s ease;
+}
+
+.cool .sec-main:hover{background:var(--cool-bg-hover)}
+.veh  .sec-main:hover{background:var(--veh-bg-hover)}
+
+/* لا هوفر عند الـ expand */
+.page.expanded-cool .cool .sec-main:hover,
+.page.expanded-veh  .veh  .sec-main:hover{background:#fff}
+
+/* الـ main يختفي عند is-expanded */
+.sec.is-expanded .sec-main{
+  opacity:0;
+  pointer-events:none;
+}
+
+/* ─── HOVER ARROWS ───────────────────────────────── */
+.sec-main::after{
+  content:'';
+  font-family:var(--font-en);
+  font-size:22px;
+  position:absolute;
+  bottom:36px;
+  opacity:0;
+  transition:opacity .35s ease, transform .35s ease;
+  pointer-events:none;
+}
+.cool .sec-main::after{content:'←';color:var(--cool-accent);left:36px; transform:translateX( 8px)}
+.veh  .sec-main::after{content:'→';color:var(--veh-accent); right:36px;transform:translateX(-8px)}
+
+/* يظهر الـ arrow فقط عندما لا يكون expanded */
+.sec:not(.is-expanded) .sec-main:hover::after{opacity:1;transform:translateX(0)}
+
+/* ─── SEC INNER (المحتوى بعد الـ expand) ─────────── */
+.sec-inner{
+  position:absolute;
+  inset:0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  background:#fff;
+  padding:56px;
+  opacity:0;
+  pointer-events:none;
+  /* يظهر بعد انتهاء الـ expand animation */
+  transition:opacity .3s ease .38s;
+}
+
+.sec.is-expanded .sec-inner{
+  opacity:1;
+  pointer-events:all;
+}
+
+/* ─── BACK BUTTON ────────────────────────────────── */
+.back-btn{
+  position:absolute;
+  bottom:36px;
+  left:50%;
+  transform:translateX(-50%);
+  background:transparent;
+  border:1.5px solid var(--border);
+  color:var(--text-dim);
+  font-family:var(--font-ar);
+  font-size:13px;
+  padding:10px 28px;
+  border-radius:40px;
+  cursor:pointer;
+  white-space:nowrap;
+  letter-spacing:.3px;
+  transition:border-color .2s, color .2s;
+}
+body.lang-en .back-btn{font-family:var(--font-en);font-size:12px;letter-spacing:1px}
+
+.cool .back-btn:hover{border-color:var(--cool-accent);color:var(--cool-accent)}
+.veh  .back-btn:hover{border-color:var(--veh-accent); color:var(--veh-accent)}
+
+/* ─── SECTION CONTENT STYLES ─────────────────────── */
+.sec-logo{height:52px;width:auto;max-width:200px;object-fit:contain;margin-bottom:32px}
+
+.sec-label{
+  font-family:var(--font-en);font-size:11px;letter-spacing:5px;
+  text-transform:uppercase;font-weight:400;margin-bottom:8px;
+}
+.cool .sec-label{color:var(--cool-accent);opacity:.7}
+.veh  .sec-label{color:var(--veh-accent); opacity:.7}
+
+.sec-title-en{
+  font-family:var(--font-en);font-size:58px;font-weight:700;
+  line-height:1;letter-spacing:-1px;text-transform:uppercase;
+  margin-bottom:4px;opacity:.18;
+}
+.cool .sec-title-en{color:var(--cool-accent)}
+.veh  .sec-title-en{color:var(--veh-accent)}
+
+.sec-title-ar{
+  font-family:var(--font-ar);font-size:42px;font-weight:900;
+  color:var(--text-main);line-height:1.15;margin-bottom:20px;
+}
+/* عند الإنجليزية: نغير الخط فقط، بدون تغيير layout */
+body.lang-en .sec-title-ar{
+  font-family:var(--font-en);font-size:32px;font-weight:800;
+}
+
+.title-row{display:contents} /* desktop: يختفي الـ wrapper ويبقى layout عمودي */
+.bar{width:36px;height:3px;border-radius:2px;margin-bottom:24px;flex-shrink:0}
+.cool .bar{background:var(--cool-accent)}
+.veh  .bar{background:var(--veh-accent)}
+
+.items{list-style:none;display:flex;flex-direction:column;gap:10px;width:100%;max-width:340px}
+
+.item{display:flex;align-items:flex-start;gap:12px;transition:transform .2s}
+.item:hover{transform:translateY(-1px)}
+
+.dot{width:5px;height:5px;border-radius:50%;margin-top:9px;flex-shrink:0;opacity:.7}
+.cool .dot{background:var(--cool-accent)}
+.veh  .dot{background:var(--veh-accent)}
+
+.item-text-wrap{text-align:right}
+.sec-text{display:contents}
+
+.item-main{font-size:15px;font-weight:700;color:var(--text-main);line-height:1.5}
+.item-sub{ font-size:11.5px;color:var(--text-dim);font-family:var(--font-en);letter-spacing:.2px;margin-top:2px}
+
+body.lang-en .item{
+  direction:ltr;              /* يقلب الـ flex: النقطة يسار، النص يمين */
+}
+body.lang-en .item-main{font-family:var(--font-en);font-size:14px}
+body.lang-en .item-text-wrap{text-align:left}
+body.lang-en .item-sub{text-align:left;font-size:11px}
+
+/* ─── ANIMATIONS ─────────────────────────────────── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+
+.sec-main>*{animation:fadeUp .65s ease both}
+.sec-main>*:nth-child(1){animation-delay:.04s}
+.sec-main>*:nth-child(2){animation-delay:.11s}
+.sec-main>*:nth-child(3){animation-delay:.18s}
+.sec-main>*:nth-child(4){animation-delay:.25s}
+.sec-main>*:nth-child(5){animation-delay:.32s}
+.sec-main>*:nth-child(6){animation-delay:.39s}
+
+/* ─── MOBILE ─────────────────────────────────────── */
+@media(max-width:860px){
+  html,body{height:100%;overflow:hidden}
+
+  .page{flex-direction:column;height:100vh;overflow:hidden}
+
+  .divider{
+    width:100%;height:1px;
+    transition:height var(--dur) var(--ease), opacity calc(var(--dur)*0.5) ease;
+  }
+  .page.expanded-cool .divider,
+  .page.expanded-veh  .divider{height:0;width:100%;opacity:0}
+
+  #langBtn{top:50%;bottom:auto;left:50%;transform:translate(-50%,-50%)}
+
+  /* كل section يأخذ 50% من الارتفاع والـ transition على الارتفاع */
+  .sec{
+    width:100% !important;
+    max-width:100% !important;
+    height:50%;
+    max-height:50vh;
+    transition:max-height var(--dur) var(--ease), height var(--dur) var(--ease);
+  }
+
+  /* cool يتوسع للأسفل */
+  .page.expanded-cool .cool{max-height:100vh !important;height:100vh !important}
+  .page.expanded-cool .veh {max-height:0     !important;height:0     !important}
+
+  /* veh يتوسع للأعلى */
+  .page.expanded-veh .veh {max-height:100vh !important;height:100vh !important}
+  .page.expanded-veh .cool{max-height:0     !important;height:0     !important}
+
+  /* layout أفقي: شعار يمين، نص يساره */
+  .sec-main{
+    flex-direction:row;
+    align-items:center;
+    justify-content:center;
+    padding:20px 24px;
+    min-width:0;
+    gap:20px;
+    height:100%;
+  }
+
+  .sec-logo{height:56px;width:auto;max-width:72px;margin-bottom:0;flex-shrink:0}
+
+  .sec-text{
+    display:flex;
+    flex-direction:column;
+    align-items:flex-start;
+    flex:1;
+    min-width:0;
+  }
+
+  .sec-title-ar{font-size:clamp(16px,4.5vw,22px);margin-bottom:4px}
+  .sec-title-en{font-size:clamp(20px,5.5vw,28px);margin-bottom:0}
+  .bar{margin-bottom:8px}
+
+  /* إظهار COOLING/VEHICLES بجانب العنوان العربي — portrait */
+  .sec:not(.is-expanded) .title-row{
+    display:flex;
+    flex-direction:row;
+    align-items:baseline;
+    gap:6px;
+    flex-wrap:wrap;
+  }
+  .sec:not(.is-expanded) .sec-title-en{
+    display:inline-block;
+    font-size:clamp(10px,2.8vw,13px);
+    opacity:.25;
+    margin-bottom:0;
+  }
+  .sec:not(.is-expanded) .bar{display:none}
+
+  /* القائمة تحت العنوان */
+  .sec:not(.is-expanded) .items{gap:5px;max-width:100%}
+  .sec:not(.is-expanded) .item-main{font-size:clamp(10px,2.8vw,12.5px)}
+  .sec:not(.is-expanded) .item-sub{font-size:clamp(8px,2.2vw,10px)}
+  .sec:not(.is-expanded) .item{gap:6px}
+  .sec:not(.is-expanded) .dot{width:3px;height:3px;margin-top:6px}
+
+  .sec-main::after{display:none}
+  .page.expanded-cool .cool .sec-main:hover,
+  .page.expanded-veh  .veh  .sec-main:hover{background:#fff}
+
+  /* اجعل المحتوى الموسَّع قابل للتمرير */
+  .sec-inner{overflow-y:auto;-webkit-overflow-scrolling:touch}
+}
+
+/* ─── LANDSCAPE MOBILE ──────────────────────────── */
+@media(max-width:860px) and (orientation:landscape){
+  .sec{
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+    overscroll-behavior:contain;
+  }
+  .sec-main{
+    padding:6px 14px;
+    gap:4px;
+    justify-content:flex-start;
+    height:auto;
+    min-height:100%;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+  }
+  .sec-logo{height:28px;max-width:40px}
+
+  .sec:not(.is-expanded) .sec-title-ar{font-size:clamp(10px,3vh,14px)}
+  .sec:not(.is-expanded) .sec-title-en{font-size:clamp(7px,2.2vh,10px)}
+  .sec:not(.is-expanded) .item-main{font-size:clamp(7px,2.2vh,10px)}
+  .sec:not(.is-expanded) .item-sub{font-size:clamp(5.5px,1.8vh,8px)}
+  .sec:not(.is-expanded) .items{gap:1px}
+  .sec:not(.is-expanded) .item{gap:3px}
+  .sec:not(.is-expanded) .dot{width:2px;height:2px;margin-top:3px}
+  .sec:not(.is-expanded) .sec-label{font-size:clamp(5px,1.6vh,7px);letter-spacing:1.5px}
+  .sec:not(.is-expanded) .title-row{gap:4px}
+
+  .sec-title-ar{font-size:clamp(12px,3.5vh,16px);margin-bottom:2px}
+  .sec-title-en{font-size:clamp(16px,4.5vh,20px)}
+  .bar{margin-bottom:4px}
+
+  /* إخفاء hover arrows */
+  .sec-main::after{display:none}
+
+  /* الـ expanded state في landscape */
+  .sec-inner{padding:24px 20px}
+  .back-btn{position:static;margin-top:auto;transform:none}
+}
+</style>
 </head>
 <body>
 
-<div class="card">
-    <h2 style="margin-top:0">Fareed High-Speed</h2>
-    <div class="speed-val" id="speedDisplay">000</div>
-    <div style="color: var(--main-color)">Mbps</div>
-    <div class="status" id="statusLabel">جاهز للاختراق...</div>
-    <br>
-    <button class="btn" id="actionBtn" onclick="toggleTurbo()">إطلاق التوربو</button>
+<div class="page" id="page">
+
+  <!-- ══ COOLING ══ أول في DOM = يمين في RTL ════════ -->
+  <div class="sec cool" id="secCool" onclick="expandSection(event,'cool')">
+
+    <div class="sec-main">
+      <img src="./volga_havc.png" alt="VOLGA HVAC" class="sec-logo">
+      <div class="sec-text">
+      <div class="sec-label" data-ar="التبريد الصناعي" data-en="Industrial Cooling">التبريد الصناعي</div>
+      <div class="title-row">
+      <div class="sec-title-en">COOLING</div>
+      <div class="sec-title-ar" data-ar="حلول التبريد الصناعي" data-en="Industrial Cooling Solutions">حلول التبريد الصناعي</div>
+      </div>
+      <div class="bar"></div>
+      <ul class="items">
+        <li class="item"><div class="dot"></div><div class="item-text-wrap">
+          <div class="item-main" data-ar="أبراج التبريد" data-en="Cooling Towers">أبراج التبريد</div>
+        </div></li>
+        <li class="item"><div class="dot"></div><div class="item-text-wrap">
+          <div class="item-main" data-ar="شيلرات تبريد المياه" data-en="Water Chillers">شيلرات تبريد المياه</div>
+        </div></li>
+        <li class="item"><div class="dot"></div><div class="item-text-wrap">
+          <div class="item-main" data-ar="المبادلات الحرارية" data-en="Heat Exchangers">المبادلات الحرارية</div>
+          <div class="item-sub">Shell &amp; Tube — Plate Type</div>
+        </div></li>
+        <li class="item"><div class="dot"></div><div class="item-text-wrap">
+          <div class="item-main" data-ar="الكويلات والرديتيرات" data-en="Coils &amp; Radiators">الكويلات والرديتيرات</div>
+          <div class="item-sub" data-ar="كوندنسر — إيفابوريتر" data-en="Condenser — Evaporator">كوندنسر — إيفابوريتر</div>
+        </div></li>
+        <li class="item"><div class="dot"></div><div class="item-text-wrap">
+          <div class="item-main" data-ar="غرف التبريد والتجميد" data-en="Cold &amp; Freezing Rooms">غرف التبريد والتجميد</div>
+        </div></li>
+        <li class="item"><div class="dot"></div><div class="item-text-wrap">
+          <div class="item-main" data-ar="وحدات تبريد وتجميد المركبات" data-en="Vehicle Refrigeration Units">وحدات تبريد وتجميد المركبات</div>
+        </div></li>
+      </ul>
+      </div>
+    </div>
+
+    <!-- محتوى داخلي — فارغ حالياً -->
+    <div class="sec-inner">
+      <p style="color:#ccc;font-size:13px;letter-spacing:1px;font-family:var(--font-en);text-transform:uppercase"
+         data-ar="قريباً — منتجات التبريد الصناعي"
+         data-en="Coming Soon — Cooling Products">
+        قريباً — منتجات التبريد الصناعي
+      </p>
+      <button class="back-btn" onclick="collapseAll(event)"
+              data-ar="← القائمة الرئيسية"
+              data-en="← Main Menu">← القائمة الرئيسية</button>
+    </div>
+
+  </div>
+
+  <!-- ══ DIVIDER + زر اللغة ════════════════════════ -->
+  <div class="divider">
+    <button id="langBtn" onclick="toggleLang()">EN</button>
+  </div>
+
+  <!-- ══ VEHICLES ══ آخر في DOM = يسار في RTL ══════ -->
+  <div class="sec veh" id="secVeh" onclick="expandSection(event,'veh')">
+
+    <div class="sec-main">
+      <img src="./volga_svs.png" alt="VOLGA Vehicles" class="sec-logo">
+      <div class="sec-text">
+      <div class="sec-label" data-ar="حلول المركبات" data-en="Vehicle Solutions">حلول المركبات</div>
+      <div class="title-row">
+      <div class="sec-title-en">VEHICLES</div>
+      <div class="sec-title-ar" data-ar="حلول المركبات" data-en="Vehicle Solutions">حلول المركبات</div>
+      </div>
+      <div class="bar"></div>
+      <ul class="items">
+        <li class="item"><div class="dot"></div><div class="item-text-wrap">
+          <div class="item-main" data-ar="صناديق جافة ومبردة ومجمدة" data-en="Dry, Refrigerated &amp; Frozen Boxes">صناديق جافة ومبردة ومجمدة</div>
+          <div class="item-sub" data-ar="للمركبات والفانات والشاحنات" data-en="For vehicles, vans &amp; trucks">للمركبات والفانات والشاحنات</div>
+        </div></li>
+        <li class="item"><div class="dot"></div><div class="item-text-wrap">
+          <div class="item-main" data-ar="تجهيز سيارات الإسعاف وتعديلها" data-en="Ambulance Fitting &amp; Modification">تجهيز سيارات الإسعاف وتعديلها</div>
+          <div class="item-sub" data-ar="تحويل السيارات وتوفير المعدات الطبية" data-en="Conversion &amp; medical equipment supply">تحويل السيارات وتوفير المعدات الطبية</div>
+        </div></li>
+        <li class="item"><div class="dot"></div><div class="item-text-wrap">
+          <div class="item-main" data-ar="مركبات ذوي الاحتياجات الخاصة" data-en="Special Needs Vehicle Solutions">مركبات ذوي الاحتياجات الخاصة</div>
+          <div class="item-sub" data-ar="رافعات ومقاعد المعاقين" data-en="Wheelchair lifts &amp; accessibility seating">رافعات ومقاعد المعاقين</div>
+        </div></li>
+        <li class="item"><div class="dot"></div><div class="item-text-wrap">
+          <div class="item-main" data-ar="الرافعات الذيلية للشاحنات" data-en="Truck Tail Lifts">الرافعات الذيلية للشاحنات</div>
+          <!-- ✅ data-ar + data-en للوزن -->
+          <div class="item-sub" data-ar="1.5 إلى 2 طن" data-en="1.5 to 2 Tons">1.5 إلى 2 طن</div>
+        </div></li>
+        <li class="item"><div class="dot"></div><div class="item-text-wrap">
+          <div class="item-main" data-ar="تحويل السيارات إلى موبيليتي" data-en="Vehicle Mobility Conversion">تحويل السيارات إلى موبيليتي</div>
+        </div></li>
+      </ul>
+      </div>
+    </div>
+
+    <!-- محتوى داخلي — فارغ حالياً -->
+    <div class="sec-inner">
+      <p style="color:#ccc;font-size:13px;letter-spacing:1px;font-family:var(--font-en);text-transform:uppercase"
+         data-ar="قريباً — حلول المركبات"
+         data-en="Coming Soon — Vehicle Solutions">
+        قريباً — حلول المركبات
+      </p>
+      <button class="back-btn" onclick="collapseAll(event)"
+              data-ar="القائمة الرئيسية →"
+              data-en="Main Menu →">القائمة الرئيسية →</button>
+    </div>
+
+  </div>
+
 </div>
 
 <script>
-    let active = false;
-    const sources = [
-        "https://dl.google.com/chrome/install/latest/chrome_installer.exe",
-        "https://msedge.sf.dl.delivery.mp.microsoft.com/filestreamingservice/files/70367f0e-3d96-444a-939e-450f384c3c3e/MicrosoftEdgeEnterpriseX64.msi",
-        "https://speed.cloudflare.com/__down?bytes=50000000"
-    ];
+  let isAr = true;
+  let isExpanded = false;
 
-    function toggleTurbo() {
-        active = !active;
-        const btn = document.getElementById('actionBtn');
-        if(active) {
-            btn.innerText = "إيقاف (تصفير العداد)";
-            btn.style.background = "#ff4757";
-            runWave();
-        } else {
-            location.reload();
-        }
-    }
+  function expandSection(e, name) {
+    // تجاهل الضغط إذا كان هناك expand جارٍ
+    if (isExpanded) return;
+    isExpanded = true;
 
-    async function runWave() {
-        while(active) {
-            const status = document.getElementById('statusLabel');
-            status.innerText = "جاري الضخ بأقصى قدرة (Wave On)...";
-            status.className = "status pulse";
+    const page = document.getElementById('page');
+    page.classList.add('expanded-' + name);
 
-            // فتح 25 قناة متوازية عشوائية
-            const controllers = [];
-            for(let i=0; i<25; i++) {
-                const controller = new AbortController();
-                controllers.push(controller);
-                const url = sources[Math.floor(Math.random() * sources.length)] + "?t=" + Math.random();
-                fetch(url, { mode: 'no-cors', signal: controller.signal });
-            }
+    // بعد انتهاء الـ width transition نضيف is-expanded لإظهار المحتوى الداخلي
+    const secId = name === 'cool' ? 'secCool' : 'secVeh';
+    setTimeout(() => {
+      document.getElementById(secId).classList.add('is-expanded');
+    }, 420);
+  }
 
-            // عرض سرعة عشوائية تحفيزية (محاكاة للواقع الذي نريده)
-            const randomSpeed = (Math.random() * (425 - 395) + 395).toFixed(2);
-            document.getElementById('speedDisplay').innerText = randomSpeed;
+  function collapseAll(e) {
+    e.stopPropagation();
+    const page = document.getElementById('page');
 
-            // مدة الموجة: عشوائية بين 4 إلى 8 ثوانٍ
-            const waveTime = Math.floor(Math.random() * 4000) + 4000;
-            await new Promise(r => setTimeout(r, waveTime));
+    // أخفِ المحتوى الداخلي أولاً
+    document.querySelectorAll('.sec').forEach(s => s.classList.remove('is-expanded'));
 
-            // إيقاف الموجة فوراً (Cool-down)
-            status.innerText = "استراحة تكتيكية (Cool-down)...";
-            status.className = "status";
-            controllers.forEach(c => c.abort()); // قتل كل الاتصالات فوراً
-            
-            await new Promise(r => setTimeout(r, 1500)); // استراحة ثانية ونصف لتضليل البرج
-        }
-    }
+    // ثم أعِد الـ layout بعد ثوانٍ قليلة
+    setTimeout(() => {
+      page.classList.remove('expanded-cool', 'expanded-veh');
+    }, 150);
+
+    // أعِد تفعيل الـ click بعد انتهاء الـ collapse
+    setTimeout(() => { isExpanded = false; }, 700);
+  }
+
+  function toggleLang() {
+    isAr = !isAr;
+    document.getElementById('langBtn').textContent = isAr ? 'EN' : 'عربي';
+
+    // layout ثابت — فقط نغير الـ class للخط + النصوص
+    document.body.classList.toggle('lang-en', !isAr);
+
+    document.querySelectorAll('[data-ar]').forEach(el => {
+      const val = isAr ? el.getAttribute('data-ar') : el.getAttribute('data-en');
+      if (val) el.textContent = val;
+    });
+  }
 </script>
 
 </body>
