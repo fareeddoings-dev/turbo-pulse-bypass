@@ -412,8 +412,8 @@ body.lang-en .item-sub{font-size:11px}
   .sec:not(.is-expanded) .title-row{
     display:flex;
     flex-direction:column;
-    align-items:flex-start;
-    text-align:right;
+    align-items:center;
+    text-align:center;
     gap:3px;
     flex-shrink:0;
     padding:0;
@@ -435,7 +435,7 @@ body.lang-en .item-sub{font-size:11px}
     gap:6px;
     flex:1;
     min-width:0;
-    align-items:flex-end;
+    align-items:flex-start;
     width:auto;
     max-width:none;
     justify-content:center;
@@ -449,6 +449,7 @@ body.lang-en .item-sub{font-size:11px}
   body.lang-en .sec-text{direction:ltr}
   body.lang-en .title-row{align-items:flex-start;text-align:left}
   body.lang-en .items{align-items:flex-start}
+  body:not(.lang-en) .items{direction:rtl;align-items:flex-end}
 
   .sec-main::after{display:none}
   .page.expanded-cool .cool .sec-main:hover,
@@ -523,8 +524,8 @@ body.lang-en .item-sub{font-size:11px}
   .title-row{
     display:flex;
     flex-direction:column;
-    align-items:flex-start;
-    text-align:left;
+    align-items:center;
+    text-align:center;
     gap:3px;
     flex-shrink:0;
     padding:0;
@@ -560,8 +561,8 @@ body.lang-en .item-sub{font-size:11px}
 
   .bar{display:none}
 
-  /* Landscape Arabic: عنوان يمين بمحاذاة يمنى */
-  body:not(.lang-en) .title-row{text-align:right;align-items:flex-end}
+  /* Landscape: العنوان في المنتصف لعربي وإنجليزي */
+  body:not(.lang-en) .title-row{text-align:center;align-items:center}
 
   .sec-main::after{display:none}
   .sec-inner{padding:16px;overflow-y:auto;-webkit-overflow-scrolling:touch}
