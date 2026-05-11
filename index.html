@@ -266,7 +266,7 @@ body.lang-en .item-sub{text-align:left;font-size:11px}
 @media(max-width:860px){
   html,body{height:100%;overflow:hidden}
 
-  .page{flex-direction:column;height:100vh;overflow:hidden}
+  .page{flex-direction:column;height:100dvh;overflow:hidden}
 
   .divider{
     width:100%;height:1px;
@@ -277,116 +277,119 @@ body.lang-en .item-sub{text-align:left;font-size:11px}
 
   #langBtn{top:50%;bottom:auto;left:50%;transform:translate(-50%,-50%)}
 
-  /* كل section يأخذ 50% من الارتفاع والـ transition على الارتفاع */
   .sec{
     width:100% !important;
     max-width:100% !important;
     height:50%;
-    max-height:50vh;
+    max-height:50dvh;
     transition:max-height var(--dur) var(--ease), height var(--dur) var(--ease);
   }
 
-  /* cool يتوسع للأسفل */
-  .page.expanded-cool .cool{max-height:100vh !important;height:100vh !important}
+  .page.expanded-cool .cool{max-height:100dvh !important;height:100dvh !important}
   .page.expanded-cool .veh {max-height:0     !important;height:0     !important}
-
-  /* veh يتوسع للأعلى */
-  .page.expanded-veh .veh {max-height:100vh !important;height:100vh !important}
+  .page.expanded-veh .veh {max-height:100dvh !important;height:100dvh !important}
   .page.expanded-veh .cool{max-height:0     !important;height:0     !important}
 
-  /* layout أفقي: شعار يمين، نص يساره */
+  /* layout أفقي: شعار يمين، نص يساره — وسَط المحتوى */
   .sec-main{
     flex-direction:row;
     align-items:center;
     justify-content:center;
-    padding:20px 24px;
+    padding:16px 20px;
     min-width:0;
-    gap:20px;
+    gap:16px;
     height:100%;
+    overflow:hidden;
   }
 
-  .sec-logo{height:56px;width:auto;max-width:72px;margin-bottom:0;flex-shrink:0}
+  .sec-logo{height:48px;width:auto;max-width:64px;margin-bottom:0;flex-shrink:0}
 
   .sec-text{
     display:flex;
     flex-direction:column;
-    align-items:flex-start;
+    align-items:center;
     flex:1;
     min-width:0;
+    text-align:center;
   }
 
-  .sec-title-ar{font-size:clamp(16px,4.5vw,22px);margin-bottom:4px}
-  .sec-title-en{font-size:clamp(20px,5.5vw,28px);margin-bottom:0}
-  .bar{margin-bottom:8px}
+  .sec-title-ar{font-size:clamp(17px,4.5vw,24px);margin-bottom:4px}
+  .sec-title-en{font-size:clamp(22px,5.5vw,30px);margin-bottom:0}
+  .bar{margin-bottom:6px}
 
-  /* إظهار COOLING/VEHICLES بجانب العنوان العربي — portrait */
   .sec:not(.is-expanded) .title-row{
     display:flex;
     flex-direction:row;
     align-items:baseline;
+    justify-content:center;
     gap:6px;
     flex-wrap:wrap;
   }
   .sec:not(.is-expanded) .sec-title-en{
     display:inline-block;
-    font-size:clamp(10px,2.8vw,13px);
+    font-size:clamp(11px,2.8vw,14px);
     opacity:.25;
     margin-bottom:0;
   }
   .sec:not(.is-expanded) .bar{display:none}
 
-  /* القائمة تحت العنوان */
   .sec:not(.is-expanded) .items{gap:5px;max-width:100%}
-  .sec:not(.is-expanded) .item-main{font-size:clamp(10px,2.8vw,12.5px)}
-  .sec:not(.is-expanded) .item-sub{font-size:clamp(8px,2.2vw,10px)}
+  .sec:not(.is-expanded) .item-main{font-size:clamp(11px,2.8vw,13px)}
+  .sec:not(.is-expanded) .item-sub{font-size:clamp(9px,2.2vw,10.5px)}
   .sec:not(.is-expanded) .item{gap:6px}
   .sec:not(.is-expanded) .dot{width:3px;height:3px;margin-top:6px}
 
   .sec-main::after{display:none}
   .page.expanded-cool .cool .sec-main:hover,
   .page.expanded-veh  .veh  .sec-main:hover{background:#fff}
-
-  /* اجعل المحتوى الموسَّع قابل للتمرير */
   .sec-inner{overflow-y:auto;-webkit-overflow-scrolling:touch}
 }
 
 /* ─── LANDSCAPE MOBILE ──────────────────────────── */
 @media(max-width:860px) and (orientation:landscape){
   .sec{
-    overflow-y:auto;
-    -webkit-overflow-scrolling:touch;
-    overscroll-behavior:contain;
+    overflow:hidden;
   }
   .sec-main{
-    padding:6px 14px;
+    flex-direction:column;      /* رصّ عمودي للاستفادة من العرض */
+    align-items:center;
+    justify-content:center;
+    padding:8px 16px;
     gap:4px;
-    justify-content:flex-start;
-    height:auto;
-    min-height:100%;
+    height:100%;
     overflow-y:auto;
     -webkit-overflow-scrolling:touch;
+    text-align:center;
   }
-  .sec-logo{height:28px;max-width:40px}
+  .sec-logo{height:28px;max-width:40px;margin-bottom:0}
 
-  .sec:not(.is-expanded) .sec-title-ar{font-size:clamp(10px,3vh,14px)}
-  .sec:not(.is-expanded) .sec-title-en{font-size:clamp(7px,2.2vh,10px)}
-  .sec:not(.is-expanded) .item-main{font-size:clamp(7px,2.2vh,10px)}
-  .sec:not(.is-expanded) .item-sub{font-size:clamp(5.5px,1.8vh,8px)}
+  .sec-text{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    flex:1;
+    min-width:0;
+    text-align:center;
+    max-width:500px;            /* لا يتمدد كثيراً */
+  }
+
+  .sec:not(.is-expanded) .sec-title-ar{font-size:clamp(11px,2.8vh,15px)}
+  .sec:not(.is-expanded) .sec-title-en{font-size:clamp(8px,2vh,10px)}
+  .sec:not(.is-expanded) .item-main{font-size:clamp(8px,2vh,10px)}
+  .sec:not(.is-expanded) .item-sub{font-size:clamp(6.5px,1.6vh,8px)}
   .sec:not(.is-expanded) .items{gap:1px}
   .sec:not(.is-expanded) .item{gap:3px}
   .sec:not(.is-expanded) .dot{width:2px;height:2px;margin-top:3px}
-  .sec:not(.is-expanded) .sec-label{font-size:clamp(5px,1.6vh,7px);letter-spacing:1.5px}
-  .sec:not(.is-expanded) .title-row{gap:4px}
+  .sec:not(.is-expanded) .sec-label{font-size:clamp(5.5px,1.4vh,7px);letter-spacing:1px}
+  .sec:not(.is-expanded) .title-row{gap:3px;justify-content:center}
+  .sec:not(.is-expanded) .item{justify-content:center}
 
-  .sec-title-ar{font-size:clamp(12px,3.5vh,16px);margin-bottom:2px}
-  .sec-title-en{font-size:clamp(16px,4.5vh,20px)}
-  .bar{margin-bottom:4px}
+  .sec-title-ar{font-size:clamp(13px,3.2vh,17px);margin-bottom:1px}
+  .sec-title-en{font-size:clamp(16px,4vh,20px)}
+  .bar{margin-bottom:3px}
 
-  /* إخفاء hover arrows */
   .sec-main::after{display:none}
-
-  /* الـ expanded state في landscape */
-  .sec-inner{padding:24px 20px}
+  .sec-inner{padding:16px 16px}
   .back-btn{position:static;margin-top:auto;transform:none}
 }
 </style>
