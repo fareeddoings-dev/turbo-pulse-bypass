@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <title>VOLGA | حلول التبريد والمركبات</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -27,7 +27,7 @@
 }
 
 html,body{height:100%;overflow:hidden}
-body{font-family:var(--font-ar);background:#fff;color:var(--text-main);-webkit-font-smoothing:antialiased}
+body{font-family:var(--font-ar);background:#fff;color:var(--text-main);-webkit-font-smoothing:antialiased;overscroll-behavior-y:contain}
 
 /* ─── LAYOUT ─────────────────────────────────────── */
 /* dir="rtl" على html يعكس flex تلقائياً:
@@ -267,7 +267,7 @@ body.lang-en .item-sub{text-align:left;font-size:11px}
 @media(max-width:860px){
   html,body{height:100%;overflow:hidden}
 
-  .page{flex-direction:column;height:100dvh;overflow:hidden}
+  .page{flex-direction:column;height:100dvh;overflow:hidden;overscroll-behavior-y:contain}
 
   .divider{
     width:100%;height:1px;
@@ -505,6 +505,28 @@ body.lang-en .item-sub{text-align:left;font-size:11px}
 <script>
   let isAr = true;
   let isExpanded = false;
+
+  /* ─── PULL-TO-REFRESH (الجوال) ──────────────── */
+  let ptrY = 0, ptrActive = false;
+  document.addEventListener('touchstart',e=>{
+    if(window.scrollY<=0){ptrY=e.touches[0].clientY;ptrActive=true}
+  },{passive:true});
+  document.addEventListener('touchmove',e=>{
+    if(!ptrActive)return;
+    if(e.touches[0].clientY-ptrY>100){ptrActive=false;location.reload()}
+  },{passive:true});
+  document.addEventListener('touchend',()=>{ptrActive=false},{passive:true});
+
+  /* ─── ORIENTATION CHANGE ────────────────────── */
+  let orientTimer;
+  window.addEventListener('resize',()=>{
+    clearTimeout(orientTimer);
+    orientTimer=setTimeout(()=>{
+      // يعيد تثبيت الـ viewport بعد تغيير الاتجاه
+      document.documentElement.style.height=window.innerHeight+'px';
+      document.body.style.height=window.innerHeight+'px';
+    },100);
+  });
 
   function expandSection(e, name) {
     // تجاهل الضغط إذا كان هناك expand جارٍ
