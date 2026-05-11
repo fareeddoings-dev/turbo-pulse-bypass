@@ -131,7 +131,8 @@ body{font-family:var(--font-ar);background:#fff;color:var(--text-main);-webkit-f
 .page.expanded-veh  .veh  .sec-main:hover{background:#fff}
 
 /* الـ main يختفي عند is-expanded */
-.sec.is-expanded .sec-main{
+.sec.is-expanded .sec-main,
+.sec.is-closing .sec-main{
   opacity:0;
   pointer-events:none;
 }
@@ -208,20 +209,20 @@ body.lang-en .back-btn{font-family:var(--font-en);font-size:12px;letter-spacing:
 .veh  .sec-label{color:var(--veh-accent); opacity:.7}
 
 .sec-title-en{
-  font-family:var(--font-en);font-size:58px;font-weight:700;
-  line-height:1;letter-spacing:-1px;text-transform:uppercase;
-  margin-bottom:4px;opacity:.18;
+  font-family:var(--font-en);font-size:72px;font-weight:800;
+  line-height:1;letter-spacing:-2px;text-transform:uppercase;
+  margin-bottom:2px;opacity:1;
 }
 .cool .sec-title-en{color:var(--cool-accent)}
 .veh  .sec-title-en{color:var(--veh-accent)}
 
 .sec-title-ar{
-  font-family:var(--font-ar);font-size:42px;font-weight:900;
-  color:var(--text-main);line-height:1.15;margin-bottom:20px;
+  font-family:var(--font-ar);font-size:24px;font-weight:700;
+  color:var(--text-dim);line-height:1.2;margin-bottom:16px;
 }
-/* عند الإنجليزية: نغير الخط فقط، بدون تغيير layout */
+/* عند الإنجليزية: نغير الخط فقط */
 body.lang-en .sec-title-ar{
-  font-family:var(--font-en);font-size:32px;font-weight:800;
+  font-family:var(--font-en);font-size:20px;font-weight:600;
 }
 
 .title-row{display:contents} /* desktop: يختفي الـ wrapper ويبقى layout عمودي */
@@ -313,31 +314,28 @@ body.lang-en .item-sub{text-align:left;font-size:11px}
     text-align:center;
   }
 
-  .sec-title-ar{font-size:clamp(17px,4.5vw,24px);margin-bottom:4px}
-  .sec-title-en{font-size:clamp(22px,5.5vw,30px);margin-bottom:0}
+  .sec-title-ar{font-size:clamp(13px,3.2vw,18px);margin-bottom:2px}
+  .sec-title-en{font-size:clamp(26px,7vw,42px);margin-bottom:0}
   .bar{margin-bottom:6px}
 
   .sec:not(.is-expanded) .title-row{
     display:flex;
-    flex-direction:row;
-    align-items:baseline;
-    justify-content:center;
-    gap:6px;
-    flex-wrap:wrap;
+    flex-direction:column;      /* COOLING فوق، العربي تحت */
+    align-items:center;
+    gap:1px;
   }
   .sec:not(.is-expanded) .sec-title-en{
-    display:inline-block;
-    font-size:clamp(11px,2.8vw,14px);
-    opacity:.25;
+    font-size:clamp(26px,7vw,42px);
+    opacity:1;
     margin-bottom:0;
   }
   .sec:not(.is-expanded) .bar{display:none}
 
-  .sec:not(.is-expanded) .items{gap:5px;max-width:100%}
-  .sec:not(.is-expanded) .item-main{font-size:clamp(11px,2.8vw,13px)}
-  .sec:not(.is-expanded) .item-sub{font-size:clamp(9px,2.2vw,10.5px)}
-  .sec:not(.is-expanded) .item{gap:6px}
-  .sec:not(.is-expanded) .dot{width:3px;height:3px;margin-top:6px}
+  .sec:not(.is-expanded) .items{gap:4px;max-width:100%}
+  .sec:not(.is-expanded) .item-main{font-size:clamp(10px,2.6vw,12.5px)}
+  .sec:not(.is-expanded) .item-sub{font-size:clamp(8px,2vw,10px)}
+  .sec:not(.is-expanded) .item{gap:5px}
+  .sec:not(.is-expanded) .dot{width:3px;height:3px;margin-top:5px}
 
   .sec-main::after{display:none}
   .page.expanded-cool .cool .sec-main:hover,
@@ -373,20 +371,19 @@ body.lang-en .item-sub{text-align:left;font-size:11px}
     max-width:500px;            /* لا يتمدد كثيراً */
   }
 
-  .sec:not(.is-expanded) .sec-title-ar{font-size:clamp(11px,2.8vh,15px)}
-  .sec:not(.is-expanded) .sec-title-en{font-size:clamp(8px,2vh,10px)}
+  .sec:not(.is-expanded) .sec-title-ar{font-size:clamp(9px,2.2vh,13px)}
+  .sec:not(.is-expanded) .sec-title-en{font-size:clamp(16px,4.2vh,24px);opacity:1}
   .sec:not(.is-expanded) .item-main{font-size:clamp(8px,2vh,10px)}
   .sec:not(.is-expanded) .item-sub{font-size:clamp(6.5px,1.6vh,8px)}
   .sec:not(.is-expanded) .items{gap:1px}
   .sec:not(.is-expanded) .item{gap:3px}
   .sec:not(.is-expanded) .dot{width:2px;height:2px;margin-top:3px}
-  .sec:not(.is-expanded) .sec-label{font-size:clamp(5.5px,1.4vh,7px);letter-spacing:1px}
-  .sec:not(.is-expanded) .title-row{gap:3px;justify-content:center}
+  .sec:not(.is-expanded) .title-row{gap:1px;justify-content:center;flex-direction:column}
   .sec:not(.is-expanded) .item{justify-content:center}
 
-  .sec-title-ar{font-size:clamp(13px,3.2vh,17px);margin-bottom:1px}
-  .sec-title-en{font-size:clamp(16px,4vh,20px)}
-  .bar{margin-bottom:3px}
+  .sec-title-ar{font-size:clamp(10px,2.6vh,14px);margin-bottom:1px}
+  .sec-title-en{font-size:clamp(18px,4.8vh,26px);margin-bottom:0}
+  .bar{margin-bottom:2px}
 
   .sec-main::after{display:none}
   .sec-inner{padding:16px 16px}
@@ -404,7 +401,6 @@ body.lang-en .item-sub{text-align:left;font-size:11px}
     <div class="sec-main">
       <img src="./volga_havc.png" alt="VOLGA HVAC" class="sec-logo">
       <div class="sec-text">
-      <div class="sec-label" data-ar="التبريد الصناعي" data-en="Industrial Cooling">التبريد الصناعي</div>
       <div class="title-row">
       <div class="sec-title-en">COOLING</div>
       <div class="sec-title-ar" data-ar="حلول التبريد الصناعي" data-en="Industrial Cooling Solutions">حلول التبريد الصناعي</div>
@@ -460,7 +456,6 @@ body.lang-en .item-sub{text-align:left;font-size:11px}
     <div class="sec-main">
       <img src="./volga_svs.png" alt="VOLGA Vehicles" class="sec-logo">
       <div class="sec-text">
-      <div class="sec-label" data-ar="حلول المركبات" data-en="Vehicle Solutions">حلول المركبات</div>
       <div class="title-row">
       <div class="sec-title-en">VEHICLES</div>
       <div class="sec-title-ar" data-ar="حلول المركبات" data-en="Vehicle Solutions">حلول المركبات</div>
@@ -517,12 +512,19 @@ body.lang-en .item-sub{text-align:left;font-size:11px}
     isExpanded = true;
 
     const page = document.getElementById('page');
+    const secId = name === 'cool' ? 'secCool' : 'secVeh';
+    const sec = document.getElementById(secId);
+
+    // أخفِ المحتوى الرئيسي فوراً (بدون انتظار)
+    sec.classList.add('is-closing');
+
+    // ابدأ توسيع القسم (width/height transition)
     page.classList.add('expanded-' + name);
 
-    // بعد انتهاء الـ width transition نضيف is-expanded لإظهار المحتوى الداخلي
-    const secId = name === 'cool' ? 'secCool' : 'secVeh';
+    // بعد انتهاء الـ transition أظهر المحتوى الداخلي
     setTimeout(() => {
-      document.getElementById(secId).classList.add('is-expanded');
+      sec.classList.remove('is-closing');
+      sec.classList.add('is-expanded');
     }, 420);
   }
 
@@ -531,7 +533,7 @@ body.lang-en .item-sub{text-align:left;font-size:11px}
     const page = document.getElementById('page');
 
     // أخفِ المحتوى الداخلي أولاً
-    document.querySelectorAll('.sec').forEach(s => s.classList.remove('is-expanded'));
+    document.querySelectorAll('.sec').forEach(s => s.classList.remove('is-expanded', 'is-closing'));
 
     // ثم أعِد الـ layout بعد ثوانٍ قليلة
     setTimeout(() => {
