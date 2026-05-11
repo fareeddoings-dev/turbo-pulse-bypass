@@ -120,6 +120,11 @@ body{font-family:var(--font-ar);background:#fff;color:var(--text-main);-webkit-f
   55%{transform:scaleX(1.04);transform-origin:var(--origin)}
   100%{transform:scaleX(1);transform-origin:var(--origin)}
 }
+@keyframes stretchPopY{
+  0%{transform:scaleY(.92);transform-origin:center top}
+  55%{transform:scaleY(1.04);transform-origin:center top}
+  100%{transform:scaleY(1);transform-origin:center top}
+}
 
 /* ─── خلفية القسم كامل — مع تحكم بالشفافية والتمويه ── */
 .sec::before{
@@ -177,7 +182,7 @@ body{font-family:var(--font-ar);background:#fff;color:var(--text-main);-webkit-f
   background:rgba(255,255,255,.15);
   backdrop-filter:blur(6px);
   -webkit-backdrop-filter:blur(6px);
-  transition:opacity .25s ease, background .35s ease;
+  transition:opacity .3s ease, background .35s ease, transform .45s cubic-bezier(.4,0,.2,1);
 }
 
 .cool .sec-main:hover{background:rgba(14,109,181,.06)}
@@ -188,11 +193,12 @@ body{font-family:var(--font-ar);background:#fff;color:var(--text-main);-webkit-f
 .page.expanded-veh  .veh  .sec-main:hover{background:#fff}
 
 /* الـ main يختفي عند is-expanded */
-.sec.is-expanded .sec-main,
-.sec.is-closing .sec-main{
-  opacity:0;
-  pointer-events:none;
-}
+.sec.is-expanded .sec-main{opacity:0;pointer-events:none}
+
+/* عند الإغلاق: المحتوى ينزلق في اتجاه التوسع قبل الاختفاء */
+.sec.is-closing .sec-main{opacity:0;pointer-events:none}
+.cool.is-closing .sec-main{transform:translateX(-60px)}
+.veh.is-closing .sec-main{transform:translateX(60px)}
 
 /* ─── HOVER ARROWS ───────────────────────────────── */
 .sec-main::after{
@@ -350,90 +356,142 @@ body.lang-en .item-sub{text-align:left;font-size:11px}
   .page.expanded-veh .veh {max-height:100dvh !important;height:100dvh !important}
   .page.expanded-veh .cool{max-height:0     !important;height:0     !important}
 
-  /* عمودي: الشعار فوق، المحتوى تحته، كل شيء وسَط */
+  /* عمودي: الشعار فوق، العنوان وسَط، الوصف يمين/يسار */
   .sec-main{
     flex-direction:column;
     align-items:center;
     justify-content:center;
-    padding:14px 20px;
+    padding:20px 28px;
     min-width:0;
-    gap:6px;
+    gap:8px;
     height:100%;
     overflow:hidden;
   }
 
-  .sec-logo{height:56px;width:auto;max-width:90px;margin-bottom:0;flex-shrink:0}
+  .sec-logo{height:68px;width:auto;max-width:120px;margin-bottom:0;flex-shrink:0}
 
   .sec-text{
     display:flex;
     flex-direction:column;
-    align-items:center;
+    align-items:stretch;
     flex:1;
     min-width:0;
-    text-align:center;
     justify-content:center;
-    gap:2px;
+    gap:6px;
   }
 
-  .sec-title-ar{font-size:clamp(12px,3vw,16px);margin-bottom:0;opacity:.7}
-  .sec-title-en{font-size:clamp(24px,6.5vw,38px);margin-bottom:0}
+  .sec-title-ar{font-size:clamp(16px,4vw,22px);margin-bottom:0;opacity:.7}
+  .sec-title-en{font-size:clamp(32px,8vw,48px);margin-bottom:0}
   .bar{display:none}
 
-  .sec:not(.is-expanded) .title-row{display:contents}
-  .sec:not(.is-expanded) .sec-title-en{font-size:clamp(24px,6.5vw,38px);opacity:1;margin-bottom:0}
-  .sec:not(.is-expanded) .items{gap:3px;max-width:320px}
-  .sec:not(.is-expanded) .item-main{font-size:clamp(10px,2.5vw,12px)}
-  .sec:not(.is-expanded) .item-sub{font-size:clamp(8px,1.8vw,9.5px)}
-  .sec:not(.is-expanded) .item{gap:5px}
-  .sec:not(.is-expanded) .dot{width:3px;height:3px;margin-top:4px}
+  .sec:not(.is-expanded) .title-row{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    text-align:center;
+    gap:2px;
+  }
+  .sec:not(.is-expanded) .sec-title-en{font-size:clamp(32px,8vw,48px);opacity:1;margin-bottom:0}
+  .sec:not(.is-expanded) .sec-title-ar{font-size:clamp(16px,4vw,22px);margin-bottom:0;opacity:.7}
+  .sec:not(.is-expanded) .items{
+    gap:8px;
+    width:100%;
+    max-width:100%;
+    align-items:flex-start;
+  }
+  .sec:not(.is-expanded) .item-main{font-size:clamp(14px,3.5vw,18px)}
+  .sec:not(.is-expanded) .item-sub{font-size:clamp(11px,2.6vw,14px)}
+  .sec:not(.is-expanded) .item{gap:8px}
+  .sec:not(.is-expanded) .dot{width:4px;height:4px;margin-top:6px}
 
   .sec-main::after{display:none}
   .page.expanded-cool .cool .sec-main:hover,
   .page.expanded-veh  .veh  .sec-main:hover{background:#fff}
   .sec-inner{overflow-y:auto;-webkit-overflow-scrolling:touch}
+
+  /* stretch عمودي عند التوسعة */
+  .page.expanded-cool .cool,
+  .page.expanded-veh  .veh{
+    animation:stretchPopY var(--dur) cubic-bezier(.34,1.4,.64,1);
+  }
+
+  /* القسم المنكمش: المحتوى ينزلق لتحت */
+  .page.expanded-cool .veh .sec-main,
+  .page.expanded-veh .cool .sec-main{
+    transform:translateY(50px);
+    opacity:0;
+  }
+
+  /* خلفية القسم:
+     الصورة تختفي -> يصير ابيض (مثل الديسكتوب) */
+  .sec.is-expanded::before,
+  .sec.is-closing::before{opacity:0 !important}
+  .sec.is-expanded,
+  .sec.is-closing{background:#fff}
 }
 
 /* ─── LANDSCAPE MOBILE ──────────────────────────── */
+/* 3 أعمدة: شعار يسار | عنوان وسَط | وصف يمين        */
 @media(max-width:860px) and (orientation:landscape){
-  .sec{
-    overflow:hidden;
-  }
+  .sec{overflow:hidden}
+
   .sec-main{
-    flex-direction:column;      /* رصّ عمودي للاستفادة من العرض */
+    direction:ltr;              /* شعار يسار، وصف يمين */
+    flex-direction:row;
     align-items:center;
     justify-content:center;
     padding:8px 16px;
-    gap:4px;
+    gap:16px;
     height:100%;
     overflow-y:auto;
     -webkit-overflow-scrolling:touch;
-    text-align:center;
   }
-  .sec-logo{height:40px;max-width:60px;margin-bottom:0}
+
+  .sec-logo{height:55px;width:auto;max-width:100px;flex-shrink:0}
 
   .sec-text{
     display:flex;
-    flex-direction:column;
+    flex-direction:row;
     align-items:center;
     flex:1;
     min-width:0;
-    text-align:center;
-    max-width:500px;            /* لا يتمدد كثيراً */
+    gap:12px;
   }
 
-  .sec:not(.is-expanded) .sec-title-ar{font-size:clamp(9px,2.2vh,13px)}
-  .sec:not(.is-expanded) .sec-title-en{font-size:clamp(16px,4.2vh,24px);opacity:1}
-  .sec:not(.is-expanded) .item-main{font-size:clamp(8px,2vh,10px)}
-  .sec:not(.is-expanded) .item-sub{font-size:clamp(6.5px,1.6vh,8px)}
-  .sec:not(.is-expanded) .items{gap:1px}
-  .sec:not(.is-expanded) .item{gap:3px}
-  .sec:not(.is-expanded) .dot{width:2px;height:2px;margin-top:3px}
-  .sec:not(.is-expanded) .title-row{gap:1px;justify-content:center;flex-direction:column;padding:8px 0}
-  .sec:not(.is-expanded) .item{justify-content:center}
+  .title-row{
+    direction:rtl;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    text-align:center;
+    gap:2px;
+    flex:1;
+    padding:0;
+  }
+  .items{
+    direction:rtl;
+    gap:4px;
+    min-width:220px;
+    width:auto;
+    align-items:flex-start;
+  }
 
-  .sec-title-ar{font-size:clamp(10px,2.6vh,14px);margin-bottom:1px}
-  .sec-title-en{font-size:clamp(18px,4.8vh,26px);margin-bottom:0}
-  .bar{margin-bottom:2px}
+  .sec:not(.is-expanded) .sec-title-en{
+    font-size:clamp(24px,5.5vh,36px);
+    opacity:1;
+    margin-bottom:0;
+  }
+  .sec:not(.is-expanded) .sec-title-ar{
+    font-size:clamp(14px,3.2vh,20px);
+    margin-bottom:0;opacity:.7;
+  }
+  .sec:not(.is-expanded) .item-main{font-size:clamp(12px,2.8vh,16px)}
+  .sec:not(.is-expanded) .item-sub{font-size:clamp(10px,2.2vh,13px)}
+  .sec:not(.is-expanded) .items{gap:4px}
+  .sec:not(.is-expanded) .item{gap:7px}
+  .sec:not(.is-expanded) .dot{width:4px;height:4px;margin-top:5px}
+
+  .bar{display:none}
 
   .sec-main::after{display:none}
   .sec-inner{padding:16px 16px}
