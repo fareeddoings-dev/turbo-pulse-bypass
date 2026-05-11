@@ -422,10 +422,26 @@ body.lang-en .item-sub{text-align:left;font-size:11px}
   .page.expanded-veh  .veh  .sec-main:hover{background:#fff}
   .sec-inner{overflow-y:auto;-webkit-overflow-scrolling:touch}
 
-  /* stretch عمودي عند التوسعة */
+  /* إلغاء stretch على موبايل — يسبب تشويه مرئي */
   .page.expanded-cool .cool,
   .page.expanded-veh  .veh{
-    animation:stretchPopY var(--dur) cubic-bezier(.34,1.4,.64,1);
+    animation:none;
+  }
+
+  /* القسم العلوي (cool): المحتوى ينزل من فوق */
+  .cool .sec-inner{
+    transform:translateY(-28px);
+    transition:opacity .35s ease .38s, transform .48s cubic-bezier(.4,0,.2,1) .38s;
+  }
+  /* القسم السفلي (veh): المحتوى يصعد من تحت */
+  .veh .sec-inner{
+    transform:translateY(28px);
+    transition:opacity .35s ease .38s, transform .48s cubic-bezier(.4,0,.2,1) .38s;
+  }
+  /* عند الفتح: ارجع للموضع الطبيعي */
+  .cool.is-expanded .sec-inner,
+  .veh.is-expanded  .sec-inner{
+    transform:translateY(0);
   }
 
   /* القسم المنكمش: المحتوى ينزلق لتحت */
