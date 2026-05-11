@@ -111,19 +111,29 @@ body{font-family:var(--font-ar);background:#fff;color:var(--text-main);-webkit-f
 .veh{--origin:left center}
 
 /* stretch animation عند التوسع */
-.page.expanded-cool .cool,
-.page.expanded-veh .veh{
-  animation:stretchPop var(--dur) cubic-bezier(.34,1.4,.64,1);
+.page.expanded-cool .cool{animation:stretchPopRight var(--dur) cubic-bezier(.34,1.4,.64,1)}
+.page.expanded-veh  .veh {animation:stretchPopLeft  var(--dur) cubic-bezier(.34,1.4,.64,1)}
+
+@keyframes stretchPopRight{
+  0%  {transform:scaleX(.92); transform-origin:right center}
+  55% {transform:scaleX(1.04);transform-origin:right center}
+  100%{transform:scaleX(1);   transform-origin:right center}
 }
-@keyframes stretchPop{
-  0%{transform:scaleX(.92);transform-origin:var(--origin)}
-  55%{transform:scaleX(1.04);transform-origin:var(--origin)}
-  100%{transform:scaleX(1);transform-origin:var(--origin)}
+@keyframes stretchPopLeft{
+  0%  {transform:scaleX(.92); transform-origin:left center}
+  55% {transform:scaleX(1.04);transform-origin:left center}
+  100%{transform:scaleX(1);   transform-origin:left center}
 }
 @keyframes stretchPopY{
   0%{transform:scaleY(.92);transform-origin:center top}
   55%{transform:scaleY(1.04);transform-origin:center top}
   100%{transform:scaleY(1);transform-origin:center top}
+}
+
+@keyframes stretchPopYUp{
+  0%  {transform:scaleY(.92); transform-origin:center bottom}
+  55% {transform:scaleY(1.04);transform-origin:center bottom}
+  100%{transform:scaleY(1);   transform-origin:center bottom}
 }
 
 /* ─── خلفية القسم كامل — مع تحكم بالشفافية والتمويه ── */
@@ -423,10 +433,8 @@ body.lang-en .item-sub{text-align:left;font-size:11px}
   .sec-inner{overflow-y:auto;-webkit-overflow-scrolling:touch}
 
   /* إلغاء stretch على موبايل — يسبب تشويه مرئي */
-  .page.expanded-cool .cool,
-  .page.expanded-veh  .veh{
-    animation:none;
-  }
+  .page.expanded-cool .cool{animation:stretchPopY    var(--dur) cubic-bezier(.34,1.4,.64,1)}
+  .page.expanded-veh  .veh {animation:stretchPopYUp  var(--dur) cubic-bezier(.34,1.4,.64,1)}
 
   /* القسم العلوي (cool): المحتوى ينزل من فوق */
   .cool .sec-inner{
@@ -531,6 +539,70 @@ body.lang-en .item-sub{text-align:left;font-size:11px}
   .sec-main::after{display:none}
   .sec-inner{padding:16px;overflow-y:auto;-webkit-overflow-scrolling:touch}
   .back-btn{position:static;margin-top:auto;transform:none}
+  .cool.is-closing .sec-main{transform:translateY( 40px)}
+  .veh.is-closing  .sec-main{transform:translateY(-40px)}
+  .cool.is-closing .sec-main{transform:translateY( 40px)}
+  .veh.is-closing  .sec-main{transform:translateY(-40px)}
+}
+/* ─── PORTRAIT MOBILE ONLY ──────────────────────── */
+@media(max-width:860px) and (orientation:portrait){
+
+  .sec:not(.is-expanded) .sec-main{
+    display:grid;
+    grid-template-areas:"title logo" "desc desc";
+grid-template-columns:1fr auto;
+    grid-template-rows:auto 1fr;
+    align-items:start;
+    padding:16px 20px;
+    gap:10px 14px;
+    height:100%;
+    overflow:hidden;
+  }
+
+  /* نفلط sec-text عشان يصير أولاده مباشرةً تحت الـ grid */
+  .sec:not(.is-expanded) .sec-text{display:contents}
+
+  .sec:not(.is-expanded) .sec-logo{
+    grid-area:logo;
+    align-self:start;
+      /* تغيير حجم الشعار هنا */
+height:70px;
+    max-width:110px;
+    margin-bottom:0;
+  }
+
+  .sec:not(.is-expanded) .title-row{
+    grid-area:title;
+    display:flex;
+    flex-direction:column;
+    align-items:flex-start;
+    justify-content:flex-start;
+    text-align:left;
+    gap:2px;
+    padding:0;
+    max-width:none;
+  }
+      /* تغيير حجم العناوين هنا */
+  .sec:not(.is-expanded) .sec-title-en{font-size:clamp(22px,6vw,34px);margin-bottom:0}
+  .sec:not(.is-expanded) .sec-title-ar{font-size:clamp(13px,3.2vw,18px);margin-bottom:0;opacity:.7}
+
+  .sec:not(.is-expanded) .items{
+    grid-area:desc;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:flex-start;
+    width:fit-content;
+    max-width:100%;
+    margin:0 auto;
+    overflow-y:auto;
+    gap:6px;
+  }
+
+  .sec:not(.is-expanded) .item-main{font-size:clamp(13px,3.5vw,17px)}
+  .sec:not(.is-expanded) .item-sub{font-size:clamp(10px,2.5vw,13px)}
+  .sec:not(.is-expanded) .dot{width:4px;height:4px;margin-top:6px}
+  .sec:not(.is-expanded) .item{gap:8px}
 }
 </style>
 </head>
