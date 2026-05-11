@@ -265,7 +265,7 @@ body{font-family:var(--font-ar);background:#fff;color:var(--text-main);-webkit-f
 
 .sec.is-expanded .sec-inner{
   opacity:1;
-  pointer-events:all;
+  pointer-events:auto;
 }
 
 /* ─── BACK BUTTON ────────────────────────────────── */
@@ -447,9 +447,8 @@ body.lang-en .item-sub{font-size:11px}
 
   /* English portrait: عنوان يسار، وصف يمين */
   body.lang-en .sec-text{direction:ltr}
-  body.lang-en .title-row{align-items:flex-start;text-align:left}
   body.lang-en .items{align-items:flex-start}
-  body:not(.lang-en) .items{direction:rtl;align-items:flex-end}
+  body:not(.lang-en) .items{direction:rtl;align-items:flex-start}
 
   .sec-main::after{display:none}
   .page.expanded-cool .cool .sec-main:hover,
@@ -498,12 +497,12 @@ body.lang-en .item-sub{font-size:11px}
 @media(max-width:860px) and (orientation:landscape){
   .sec{overflow:hidden}
 
-  .sec-main{
-    direction:ltr;              /* شعار يسار، وصف يمين */
+.sec-main{
+    direction:ltr; /* شعار يسار، وصف يمين */
     flex-direction:row;
     align-items:center;
     justify-content:center;
-    padding:8px 16px;
+    padding:18px 20px;
     gap:16px;
     height:100%;
     overflow-y:auto;
@@ -563,6 +562,7 @@ body.lang-en .item-sub{font-size:11px}
 
   /* Landscape: العنوان في المنتصف لعربي وإنجليزي */
   body:not(.lang-en) .title-row{text-align:center;align-items:center}
+  body:not(.lang-en) .items{direction:rtl;align-items:flex-end}
 
   .sec-main::after{display:none}
   .sec-inner{padding:16px;overflow-y:auto;-webkit-overflow-scrolling:touch}
