@@ -24,12 +24,15 @@
   --font-en:'Barlow Condensed',sans-serif;
   --dur:0.55s;
   --ease:cubic-bezier(.4,0,.2,1);
-  /* خلفيات الأقسام — استبدل الرابط عند تجهيز الصورة */
---cool-bg:url('./volga_havc_bg.png');
---veh-bg:url('./volga_svs_bg.png');
-  /* تحكم في شدة وضوح الخلفية (0=شفاف, 1=كامل) */
-  --cool-bg-opacity:0.5;
-  --veh-bg-opacity:1;
+  /* خلفيات الأقسام */
+  --cool-bg:url('./volga_havc_bg.png');
+  --veh-bg:url('./volga_svs_bg.png');
+  /* شفافية الخلفية (0=شفاف, 1=كامل) */
+  --cool-bg-opacity:0.4;
+  --veh-bg-opacity:0.4;
+  /* تمويه الخلفية (0=واضح, 10px=ضبابي) */
+  --cool-bg-blur:0px;
+  --veh-bg-blur:0px;
 }
 
 html,body{height:100%;overflow:hidden}
@@ -118,32 +121,34 @@ body{font-family:var(--font-ar);background:#fff;color:var(--text-main);-webkit-f
   100%{transform:scaleX(1);transform-origin:var(--origin)}
 }
 
-/* خلفية الصورة تظهر خلف العناوين فقط وتمتد كامل العرض */
-.title-row{
-  position:relative;
-  width:100%;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  padding:20px 0;          /* مسافة فوق COOLING وتحت العربي */
-}
-.title-row::before{
+/* ─── خلفية القسم كامل — مع تحكم بالشفافية والتمويه ── */
+.sec::before{
   content:'';
   position:absolute;
   inset:0;
-  left:-56px;               /* يمدد الخلفية لكامل عرض القسم */
-  right:-56px;
-  width:auto;
   background-size:cover;
   background-position:center;
   background-repeat:no-repeat;
-  z-index:-1;
+  z-index:0;
   pointer-events:none;
+  transition:opacity .25s ease, filter .3s ease;
 }
-.cool .title-row::before{background-image:var(--cool-bg);background-color:#eef6fc;opacity:var(--cool-bg-opacity)}
-.veh .title-row::before{background-image:var(--veh-bg); background-color:#fdf6ee;opacity:var(--veh-bg-opacity)}
-.sec.is-expanded .title-row::before,
-.sec.is-closing .title-row::before{opacity:0;transition:opacity .25s ease}
+.cool::before{
+  background-image:var(--cool-bg);
+  background-color:#eef6fc;
+  opacity:var(--cool-bg-opacity);
+  filter:blur(var(--cool-bg-blur));
+}
+.veh::before{
+  background-image:var(--veh-bg);
+  background-color:#fdf6ee;
+  opacity:var(--veh-bg-opacity);
+  filter:blur(var(--veh-bg-blur));
+}
+.sec.is-expanded::before,
+.sec.is-closing::before{opacity:0;transition:opacity .25s ease}
+
+/* خلفية العناوين فقط — ألغيت، صارت الخلفية عالـ sec */
 
 /* Expand: cool يتوسع لليسار */
 .page.expanded-cool .cool{max-width:100%;width:100%}
@@ -252,7 +257,7 @@ body.lang-en .back-btn{font-family:var(--font-en);font-size:12px;letter-spacing:
 .veh  .back-btn:hover{border-color:var(--veh-accent); color:var(--veh-accent)}
 
 /* ─── SECTION CONTENT STYLES ─────────────────────── */
-.sec-logo{height:52px;width:auto;max-width:200px;object-fit:contain;margin-bottom:32px}
+.sec-logo{height:80px;width:auto;max-width:280px;object-fit:contain;margin-bottom:28px}
 
 .sec-label{
   font-family:var(--font-en);font-size:11px;letter-spacing:5px;
@@ -278,7 +283,7 @@ body.lang-en .sec-title-ar{
   font-family:var(--font-en);font-size:20px;font-weight:600;
 }
 
-.title-row{position:relative;width:100%;display:flex;flex-direction:column;align-items:center;padding:20px 0}
+.title-row{display:contents} /* desktop: يختفي الـ wrapper ويبقى layout عمودي */
 .bar{width:36px;height:3px;border-radius:2px;margin-bottom:24px;flex-shrink:0}
 .cool .bar{background:var(--cool-accent)}
 .veh  .bar{background:var(--veh-accent)}
@@ -345,19 +350,19 @@ body.lang-en .item-sub{text-align:left;font-size:11px}
   .page.expanded-veh .veh {max-height:100dvh !important;height:100dvh !important}
   .page.expanded-veh .cool{max-height:0     !important;height:0     !important}
 
-  /* layout أفقي: شعار يمين، نص يساره — وسَط المحتوى */
+  /* عمودي: الشعار فوق، المحتوى تحته، كل شيء وسَط */
   .sec-main{
-    flex-direction:row;
+    flex-direction:column;
     align-items:center;
     justify-content:center;
-    padding:16px 20px;
+    padding:14px 20px;
     min-width:0;
-    gap:16px;
+    gap:6px;
     height:100%;
     overflow:hidden;
   }
 
-  .sec-logo{height:48px;width:auto;max-width:64px;margin-bottom:0;flex-shrink:0}
+  .sec-logo{height:56px;width:auto;max-width:90px;margin-bottom:0;flex-shrink:0}
 
   .sec-text{
     display:flex;
@@ -366,32 +371,21 @@ body.lang-en .item-sub{text-align:left;font-size:11px}
     flex:1;
     min-width:0;
     text-align:center;
+    justify-content:center;
+    gap:2px;
   }
 
-  .sec-title-ar{font-size:clamp(13px,3.2vw,18px);margin-bottom:2px}
-  .sec-title-en{font-size:clamp(26px,7vw,42px);margin-bottom:0}
-  .bar{margin-bottom:6px}
+  .sec-title-ar{font-size:clamp(12px,3vw,16px);margin-bottom:0;opacity:.7}
+  .sec-title-en{font-size:clamp(24px,6.5vw,38px);margin-bottom:0}
+  .bar{display:none}
 
-  .sec:not(.is-expanded) .title-row{
-    display:flex;
-    flex-direction:column;      /* COOLING فوق، العربي تحت */
-    align-items:center;
-    gap:1px;
-    padding:12px 0;
-  }
-  .sec:not(.is-expanded) .title-row::before{left:-20px;right:-20px}
-  .sec:not(.is-expanded) .sec-title-en{
-    font-size:clamp(26px,7vw,42px);
-    opacity:1;
-    margin-bottom:0;
-  }
-  .sec:not(.is-expanded) .bar{display:none}
-
-  .sec:not(.is-expanded) .items{gap:4px;max-width:100%}
-  .sec:not(.is-expanded) .item-main{font-size:clamp(10px,2.6vw,12.5px)}
-  .sec:not(.is-expanded) .item-sub{font-size:clamp(8px,2vw,10px)}
+  .sec:not(.is-expanded) .title-row{display:contents}
+  .sec:not(.is-expanded) .sec-title-en{font-size:clamp(24px,6.5vw,38px);opacity:1;margin-bottom:0}
+  .sec:not(.is-expanded) .items{gap:3px;max-width:320px}
+  .sec:not(.is-expanded) .item-main{font-size:clamp(10px,2.5vw,12px)}
+  .sec:not(.is-expanded) .item-sub{font-size:clamp(8px,1.8vw,9.5px)}
   .sec:not(.is-expanded) .item{gap:5px}
-  .sec:not(.is-expanded) .dot{width:3px;height:3px;margin-top:5px}
+  .sec:not(.is-expanded) .dot{width:3px;height:3px;margin-top:4px}
 
   .sec-main::after{display:none}
   .page.expanded-cool .cool .sec-main:hover,
@@ -415,7 +409,7 @@ body.lang-en .item-sub{text-align:left;font-size:11px}
     -webkit-overflow-scrolling:touch;
     text-align:center;
   }
-  .sec-logo{height:28px;max-width:40px;margin-bottom:0}
+  .sec-logo{height:40px;max-width:60px;margin-bottom:0}
 
   .sec-text{
     display:flex;
@@ -435,7 +429,6 @@ body.lang-en .item-sub{text-align:left;font-size:11px}
   .sec:not(.is-expanded) .item{gap:3px}
   .sec:not(.is-expanded) .dot{width:2px;height:2px;margin-top:3px}
   .sec:not(.is-expanded) .title-row{gap:1px;justify-content:center;flex-direction:column;padding:8px 0}
-  .sec:not(.is-expanded) .title-row::before{left:-16px;right:-16px}
   .sec:not(.is-expanded) .item{justify-content:center}
 
   .sec-title-ar{font-size:clamp(10px,2.6vh,14px);margin-bottom:1px}
