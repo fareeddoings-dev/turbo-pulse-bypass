@@ -27,7 +27,7 @@
 }
 
 html,body{height:100%;overflow:hidden}
-body{font-family:var(--font-ar);background:#fff;color:var(--text-main);-webkit-font-smoothing:antialiased;overscroll-behavior-y:contain}
+body{font-family:var(--font-ar);background:#fff;color:var(--text-main);-webkit-font-smoothing:antialiased}
 
 /* ─── LAYOUT ─────────────────────────────────────── */
 /* dir="rtl" على html يعكس flex تلقائياً:
@@ -265,9 +265,10 @@ body.lang-en .item-sub{text-align:left;font-size:11px}
 
 /* ─── MOBILE ─────────────────────────────────────── */
 @media(max-width:860px){
-  html,body{height:100%;overflow:hidden}
+  html,body{height:auto;overflow:visible}
+  body{min-height:calc(100dvh + 1px);overflow-y:auto;-webkit-overflow-scrolling:touch}
 
-  .page{flex-direction:column;height:100dvh;overflow:hidden;overscroll-behavior-y:contain}
+  .page{flex-direction:column;height:100dvh;overflow:hidden}
 
   .divider{
     width:100%;height:1px;
@@ -505,17 +506,6 @@ body.lang-en .item-sub{text-align:left;font-size:11px}
 <script>
   let isAr = true;
   let isExpanded = false;
-
-  /* ─── PULL-TO-REFRESH (الجوال) ──────────────── */
-  let ptrY = 0, ptrActive = false;
-  document.addEventListener('touchstart',e=>{
-    if(window.scrollY<=0){ptrY=e.touches[0].clientY;ptrActive=true}
-  },{passive:true});
-  document.addEventListener('touchmove',e=>{
-    if(!ptrActive)return;
-    if(e.touches[0].clientY-ptrY>100){ptrActive=false;location.reload()}
-  },{passive:true});
-  document.addEventListener('touchend',()=>{ptrActive=false},{passive:true});
 
   /* ─── ORIENTATION CHANGE ────────────────────── */
   let orientTimer;
