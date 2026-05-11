@@ -24,6 +24,12 @@
   --font-en:'Barlow Condensed',sans-serif;
   --dur:0.55s;
   --ease:cubic-bezier(.4,0,.2,1);
+  /* خلفيات الأقسام — استبدل الرابط عند تجهيز الصورة */
+--cool-bg:url('./volga_havc_bg.png');
+--veh-bg:url('./volga_svs_bg.png');
+  /* تحكم في شدة وضوح الخلفية (0=شفاف, 1=كامل) */
+  --cool-bg-opacity:1;
+  --veh-bg-opacity:1;
 }
 
 html,body{height:100%;overflow:hidden}
@@ -97,6 +103,22 @@ body{font-family:var(--font-ar);background:#fff;color:var(--text-main);-webkit-f
   transition:max-width var(--dur) var(--ease), width var(--dur) var(--ease);
 }
 
+/* خلفية الصورة لكل قسم — pseudo-element للتحكم بالشفافية */
+.sec::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  background-size:cover;
+  background-position:center;
+  background-repeat:no-repeat;
+  z-index:0;
+  pointer-events:none;
+}
+.cool::before{background-image:var(--cool-bg);background-color:#eef6fc;opacity:var(--cool-bg-opacity)}
+.veh::before{background-image:var(--veh-bg); background-color:#fdf6ee;opacity:var(--veh-bg-opacity)}
+.sec.is-expanded::before,
+.sec.is-closing::before{opacity:0;transition:opacity .25s ease}
+
 /* Expand: cool يتوسع لليسار */
 .page.expanded-cool .cool{max-width:100%;width:100%}
 .page.expanded-cool .veh {max-width:0;   width:0}
@@ -119,12 +141,17 @@ body{font-family:var(--font-ar);background:#fff;color:var(--text-main);-webkit-f
   justify-content:center;
   text-align:center;
   padding:56px;
-  position:relative;      /* للـ ::after arrow */
+  position:relative;      /* للـ ::after arrow و z-index */
+  z-index:1;
+  background:rgba(255,255,255,.15);
+  backdrop-filter:blur(6px);
+  -webkit-backdrop-filter:blur(6px);
   transition:opacity .25s ease, background .35s ease;
 }
 
-.cool .sec-main:hover{background:var(--cool-bg-hover)}
-.veh  .sec-main:hover{background:var(--veh-bg-hover)}
+.cool .sec-main:hover{background:rgba(14,109,181,.06)}
+.veh  .sec-main:hover{background:rgba(184,98,10,.06)}
+.sec-main *{text-shadow:0 0 5px #fff,0 0 12px rgba(255,255,255,.5)}
 
 /* لا هوفر عند الـ expand */
 .page.expanded-cool .cool .sec-main:hover,
@@ -166,6 +193,7 @@ body{font-family:var(--font-ar);background:#fff;color:var(--text-main);-webkit-f
   padding:56px;
   opacity:0;
   pointer-events:none;
+  z-index:2;              /* فوق الخلفية */
   /* يظهر بعد انتهاء الـ expand animation */
   transition:opacity .3s ease .38s;
 }
