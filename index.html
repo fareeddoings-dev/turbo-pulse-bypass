@@ -150,8 +150,24 @@ body{font-family:var(--font-ar);background:#fff;color:var(--text-main);-webkit-f
   opacity:var(--veh-bg-opacity);
   filter:blur(var(--veh-bg-blur));
 }
+
+/* طبقة ثابتة للـ blur — تفصل عن .sec-main عشان لا تختفي مع opacity */
+.sec::after{
+  content:'';
+  position:absolute;
+  inset:0;
+  z-index:1;
+  background:transparent;
+  backdrop-filter:blur(6px);
+  -webkit-backdrop-filter:blur(6px);
+  pointer-events:none;
+  transition:opacity .25s ease;
+}
+
 .sec.is-expanded::before,
-.sec.is-closing::before{opacity:0;transition:opacity .25s ease}
+.sec.is-closing::before,
+.sec.is-expanded::after,
+.sec.is-closing::after{opacity:0}
 
 /* خلفية العناوين فقط — ألغيت، صارت الخلفية عالـ sec */
 
@@ -178,10 +194,8 @@ body{font-family:var(--font-ar);background:#fff;color:var(--text-main);-webkit-f
   text-align:center;
   padding:56px;
   position:relative;      /* للـ ::after arrow و z-index */
-  z-index:1;
+  z-index:2;
   background:rgba(255,255,255,.15);
-  backdrop-filter:blur(6px);
-  -webkit-backdrop-filter:blur(6px);
   transition:opacity .3s ease, background .35s ease, transform .45s cubic-bezier(.4,0,.2,1);
 }
 
@@ -423,9 +437,11 @@ body.lang-en .item-sub{text-align:left;font-size:11px}
   }
 
   /* خلفية القسم:
-     الصورة تختفي -> يصير ابيض (مثل الديسكتوب) */
+     الصورة + البلرو يختفيان معاً -> يصير ابيض */
   .sec.is-expanded::before,
-  .sec.is-closing::before{opacity:0 !important}
+  .sec.is-closing::before,
+  .sec.is-expanded::after,
+  .sec.is-closing::after{opacity:0 !important}
   .sec.is-expanded,
   .sec.is-closing{background:#fff}
 }
@@ -455,17 +471,16 @@ body.lang-en .item-sub{text-align:left;font-size:11px}
     align-items:center;
     flex:1;
     min-width:0;
-    gap:12px;
+    justify-content:space-between;
   }
 
   .title-row{
-    direction:rtl;
     display:flex;
     flex-direction:column;
     align-items:center;
     text-align:center;
-    gap:2px;
-    flex:1;
+    gap:3px;
+    flex-shrink:0;
     padding:0;
   }
   .items{
@@ -474,6 +489,7 @@ body.lang-en .item-sub{text-align:left;font-size:11px}
     min-width:220px;
     width:auto;
     align-items:flex-start;
+    flex-shrink:0;
   }
 
   .sec:not(.is-expanded) .sec-title-en{
