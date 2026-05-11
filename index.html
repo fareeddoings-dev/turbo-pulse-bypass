@@ -2,1078 +2,629 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VOLGA Editor v2</title>
-<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+<title>VOLGA | حلول التبريد والمركبات</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&family=Barlow+Condensed:wght@300;400;600;700;800&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
 :root{
-  --blue:#0e6db5;--blue-lt:#e8f3fc;
-  --green:#1a9b5a;--red:#c0392b;
-  --border:#e0e0e0;--bg:#f4f4f4;
-  --text:#111;--dim:#888;--dim2:#bbb;
-  --panel-w:310px;
-  --font:'Tajawal',sans-serif;
+  --cool-accent:#0e6db5;
+  --cool-dark:#094d82;
+  --cool-bg-hover:#f0f7fd;
+  --veh-accent:#b8620a;
+  --veh-dark:#8a4807;
+  --veh-bg-hover:#fdf8f2;
+  --text-main:#111;
+  --text-dim:#777;
+  --border:#d8d8d8;
+  --font-ar:'Tajawal',sans-serif;
+  --font-en:'Barlow Condensed',sans-serif;
+  --dur:0.55s;
+  --ease:cubic-bezier(.4,0,.2,1);
+  /* خلفيات الأقسام — استبدل الرابط عند تجهيز الصورة */
+--cool-bg:url('./volga_havc_bg.png');
+--veh-bg:url('./volga_svs_bg.png');
+  /* تحكم في شدة وضوح الخلفية (0=شفاف, 1=كامل) */
+  --cool-bg-opacity:0.5;
+  --veh-bg-opacity:1;
 }
-html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--bg);color:var(--text);font-size:14px}
 
-/* ══ TOP BAR ══ */
-.topbar{
-  display:flex;align-items:center;gap:6px;
-  padding:8px 14px;background:#fff;
-  border-bottom:1px solid var(--border);
-  height:50px;flex-shrink:0;
+html,body{height:100%;overflow:hidden}
+body{font-family:var(--font-ar);background:#fff;color:var(--text-main);-webkit-font-smoothing:antialiased}
+
+/* ─── LAYOUT ─────────────────────────────────────── */
+/* dir="rtl" على html يعكس flex تلقائياً:
+   أول عنصر في DOM = يمين الشاشة
+   آخر عنصر في DOM = يسار الشاشة */
+.page{
+  display:flex;
+  height:100vh;
 }
-.topbar h1{font-size:15px;font-weight:700;color:var(--blue);margin-left:4px;white-space:nowrap}
-.sep{width:1px;height:22px;background:var(--border);flex-shrink:0;margin:0 2px}
-.spacer{flex:1}
-#status{font-size:12px;color:var(--dim);white-space:nowrap;max-width:200px;overflow:hidden;text-overflow:ellipsis}
 
-/* ══ BUTTONS ══ */
-.btn{
-  display:inline-flex;align-items:center;justify-content:center;gap:5px;
-  padding:6px 14px;border-radius:7px;border:1px solid var(--border);
-  background:#fff;color:var(--text);font-family:var(--font);font-size:13px;
-  cursor:pointer;transition:all .15s;font-weight:500;white-space:nowrap;flex-shrink:0;
+/* ─── DIVIDER ────────────────────────────────────── */
+.divider{
+  background:var(--border);
+  position:relative;
+  flex-shrink:0;
+  /* عرض ثابت للـ transition */
+  width:1px;
+  transition:width var(--dur) var(--ease), opacity calc(var(--dur)*0.5) ease;
+  z-index:100;
 }
-.btn:hover:not(:disabled){background:var(--bg);border-color:#bbb}
-.btn:disabled{opacity:.35;cursor:not-allowed}
-.btn.primary{background:var(--blue);color:#fff;border-color:var(--blue)}
-.btn.primary:hover:not(:disabled){background:#0a55a0}
-.btn.success{background:var(--green);color:#fff;border-color:var(--green)}
-.btn.success:hover:not(:disabled){background:#157a47}
-.btn.danger{color:var(--red);border-color:var(--red)}
-.btn.danger:hover{background:#fff0ee}
-.btn.icon{padding:6px 8px;font-size:15px}
-.btn.active{background:var(--blue-lt);border-color:var(--blue);color:var(--blue)}
-.btn.sm{padding:4px 10px;font-size:12px;border-radius:6px}
 
-/* ══ LAYOUT ══ */
-.main{display:flex;height:calc(100vh - 50px);overflow:hidden}
-
-/* ══ PANEL ══ */
-.panel{
-  width:var(--panel-w);flex-shrink:0;
-  background:#fff;border-right:1px solid var(--border);
-  display:flex;flex-direction:column;
+.page.expanded-cool .divider,
+.page.expanded-veh  .divider{
+  width:0;
+  opacity:0;
 }
-.panel-scroll{overflow-y:auto;flex:1;padding-bottom:40px}
-.panel-scroll::-webkit-scrollbar{width:5px}
-.panel-scroll::-webkit-scrollbar-thumb{background:var(--dim2);border-radius:3px}
 
-.empty{
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  height:100%;gap:10px;color:var(--dim);text-align:center;padding:28px;
+/* ─── LANG BTN — في منتصف الـ divider ───────────── */
+#langBtn{
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  background:#fff;
+  border:1px solid #ccc;
+  color:#444;
+  font-family:var(--font-en);
+  font-size:11px;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  padding:8px 18px;
+  border-radius:40px;
+  cursor:pointer;
+  white-space:nowrap;
+  transition:background .2s, opacity .3s;
+  box-shadow:0 2px 8px rgba(0,0,0,.09);
 }
-.empty .ico{font-size:40px;opacity:.25}
-.empty p{font-size:12px;line-height:1.8}
-.empty .hint{font-size:11px;color:var(--dim2);margin-top:6px}
+#langBtn:hover{background:#f0f0f0}
 
-/* ══ PANEL SECTIONS ══ */
-.ps{border-bottom:1px solid var(--border);padding:10px 12px}
-.ps-head{
-  font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;
-  color:var(--dim);margin-bottom:9px;display:flex;align-items:center;gap:5px;
+.page.expanded-cool .divider #langBtn,
+.page.expanded-veh  .divider #langBtn{
+  opacity:0;
+  pointer-events:none;
 }
-.el-tag{
-  background:var(--blue-lt);color:var(--blue);
-  border-radius:5px;padding:2px 8px;font-size:11.5px;font-weight:700;
-  font-family:monospace;word-break:break-all;display:inline-block;margin-bottom:8px;
+
+/* ─── SECTIONS ───────────────────────────────────── */
+.sec{
+  /* كل قسم يأخذ نصف العرض */
+  width:50%;
+  max-width:50%;
+  flex-shrink:0;
+  position:relative;
+  overflow:hidden;
+  display:flex;
+  cursor:pointer;
+  /* الـ transition على max-width تعمل بشكل سلس في flex */
+  transition:max-width var(--dur) var(--ease), width var(--dur) var(--ease);
+  /* نقطة التمركز للامتداد */
+  --origin:center;
 }
-.el-actions{display:flex;gap:5px;flex-wrap:wrap}
+.cool{--origin:right center}
+.veh{--origin:left center}
 
-/* ══ FORM ROW ══ */
-.row{display:flex;align-items:center;gap:7px;margin-bottom:7px}
-.row:last-child{margin-bottom:0}
-.lbl{font-size:11.5px;color:var(--dim);flex-shrink:0;width:56px;text-align:right}
-.lbl.w64{width:64px}
-.lbl.w72{width:72px}
-
-input[type=text],input[type=number],textarea,select{
-  flex:1;padding:5px 8px;border:1px solid var(--border);border-radius:6px;
-  font-family:var(--font);font-size:13px;color:var(--text);background:#fafafa;
-  transition:border .15s;min-width:0;
+/* stretch animation عند التوسع */
+.page.expanded-cool .cool,
+.page.expanded-veh .veh{
+  animation:stretchPop var(--dur) cubic-bezier(.34,1.4,.64,1);
 }
-input:focus,textarea:focus,select:focus{outline:none;border-color:var(--blue);background:#fff}
-textarea{resize:vertical;min-height:56px;line-height:1.5;direction:rtl}
-input[type=range]{flex:1;accent-color:var(--blue);height:4px;cursor:pointer}
-.num-sm{width:52px!important;flex:none!important;text-align:center}
-
-/* ══ COLOR ROW ══ */
-.color-pair{display:flex;align-items:center;gap:6px;flex:1}
-input[type=color]{
-  width:34px;height:30px;padding:2px;border-radius:6px;
-  border:1px solid var(--border);cursor:pointer;background:#fafafa;flex-shrink:0;
+@keyframes stretchPop{
+  0%{transform:scaleX(.92);transform-origin:var(--origin)}
+  55%{transform:scaleX(1.04);transform-origin:var(--origin)}
+  100%{transform:scaleX(1);transform-origin:var(--origin)}
 }
-.hex-inp{flex:1;font-family:monospace;font-size:12px;letter-spacing:.5px}
 
-/* ══ TOGGLE GROUP ══ */
-.tg{display:flex;gap:4px;flex:1}
-.tg .btn{flex:1;justify-content:center;padding:5px 3px;font-size:12px}
-
-/* ══ SPACING GRID ══ */
-.sp-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
-.sp-item{display:flex;flex-direction:column;gap:3px}
-.sp-item label{font-size:10.5px;color:var(--dim);text-align:center}
-.sp-item input{text-align:center;font-size:12px}
-
-/* ══ PREVIEW ══ */
-.preview-wrap{flex:1;min-width:0;display:flex;flex-direction:column}
-.preview-bar{
-  display:flex;align-items:center;gap:8px;
-  padding:5px 10px;background:#eee;border-bottom:1px solid var(--border);
-  font-size:12px;color:var(--dim);flex-shrink:0;
+/* خلفية الصورة تظهر خلف العناوين فقط وتمتد كامل العرض */
+.title-row{
+  position:relative;
+  width:100%;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  padding:20px 0;          /* مسافة فوق COOLING وتحت العربي */
 }
-#preview{flex:1;border:none;width:100%;background:#fff;transform-origin:top center}
-.preview-container{flex:1;overflow:auto;position:relative}
+.title-row::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  left:-56px;               /* يمدد الخلفية لكامل عرض القسم */
+  right:-56px;
+  width:auto;
+  background-size:cover;
+  background-position:center;
+  background-repeat:no-repeat;
+  z-index:-1;
+  pointer-events:none;
+}
+.cool .title-row::before{background-image:var(--cool-bg);background-color:#eef6fc;opacity:var(--cool-bg-opacity)}
+.veh .title-row::before{background-image:var(--veh-bg); background-color:#fdf6ee;opacity:var(--veh-bg-opacity)}
+.sec.is-expanded .title-row::before,
+.sec.is-closing .title-row::before{opacity:0;transition:opacity .25s ease}
+
+/* Expand: cool يتوسع لليسار */
+.page.expanded-cool .cool{max-width:100%;width:100%}
+.page.expanded-cool .veh {max-width:0;   width:0}
+
+/* Expand: veh يتوسع لليمين */
+.page.expanded-veh .veh {max-width:100%;width:100%}
+.page.expanded-veh .cool{max-width:0;   width:0}
+
+/* بعد الـ expand، الـ section الموسَّع لا يستجيب للهوفر */
+.page.expanded-cool .cool,
+.page.expanded-veh  .veh{cursor:default}
+
+/* ─── SEC MAIN (المحتوى الرئيسي) ─────────────────── */
+.sec-main{
+  width:100%;
+  min-width:340px;        /* يمنع تشوه المحتوى أثناء الـ animation */
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding:56px;
+  position:relative;      /* للـ ::after arrow و z-index */
+  z-index:1;
+  background:rgba(255,255,255,.15);
+  backdrop-filter:blur(6px);
+  -webkit-backdrop-filter:blur(6px);
+  transition:opacity .25s ease, background .35s ease;
+}
+
+.cool .sec-main:hover{background:rgba(14,109,181,.06)}
+.veh  .sec-main:hover{background:rgba(184,98,10,.06)}
+
+/* لا هوفر عند الـ expand */
+.page.expanded-cool .cool .sec-main:hover,
+.page.expanded-veh  .veh  .sec-main:hover{background:#fff}
+
+/* الـ main يختفي عند is-expanded */
+.sec.is-expanded .sec-main,
+.sec.is-closing .sec-main{
+  opacity:0;
+  pointer-events:none;
+}
+
+/* ─── HOVER ARROWS ───────────────────────────────── */
+.sec-main::after{
+  content:'';
+  font-family:var(--font-en);
+  font-size:22px;
+  position:absolute;
+  bottom:36px;
+  opacity:0;
+  transition:opacity .35s ease, transform .35s ease;
+  pointer-events:none;
+}
+.cool .sec-main::after{content:'←';color:var(--cool-accent);left:36px; transform:translateX( 8px)}
+.veh  .sec-main::after{content:'→';color:var(--veh-accent); right:36px;transform:translateX(-8px)}
+
+/* يظهر الـ arrow فقط عندما لا يكون expanded */
+.sec:not(.is-expanded) .sec-main:hover::after{opacity:1;transform:translateX(0)}
+
+/* ─── SEC INNER (المحتوى بعد الـ expand) ─────────── */
+.sec-inner{
+  position:absolute;
+  inset:0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  background:#fff;
+  padding:56px;
+  opacity:0;
+  pointer-events:none;
+  z-index:2;              /* فوق الخلفية */
+  /* يظهر بعد انتهاء الـ expand animation */
+  transition:opacity .3s ease .38s;
+}
+
+.sec.is-expanded .sec-inner{
+  opacity:1;
+  pointer-events:all;
+}
+
+/* ─── BACK BUTTON ────────────────────────────────── */
+.back-btn{
+  position:absolute;
+  bottom:36px;
+  left:50%;
+  transform:translateX(-50%);
+  background:transparent;
+  border:1.5px solid var(--border);
+  color:var(--text-dim);
+  font-family:var(--font-ar);
+  font-size:13px;
+  padding:10px 28px;
+  border-radius:40px;
+  cursor:pointer;
+  white-space:nowrap;
+  letter-spacing:.3px;
+  transition:border-color .2s, color .2s;
+}
+body.lang-en .back-btn{font-family:var(--font-en);font-size:12px;letter-spacing:1px}
+
+.cool .back-btn:hover{border-color:var(--cool-accent);color:var(--cool-accent)}
+.veh  .back-btn:hover{border-color:var(--veh-accent); color:var(--veh-accent)}
+
+/* ─── SECTION CONTENT STYLES ─────────────────────── */
+.sec-logo{height:52px;width:auto;max-width:200px;object-fit:contain;margin-bottom:32px}
+
+.sec-label{
+  font-family:var(--font-en);font-size:11px;letter-spacing:5px;
+  text-transform:uppercase;font-weight:400;margin-bottom:8px;
+}
+.cool .sec-label{color:var(--cool-accent);opacity:.7}
+.veh  .sec-label{color:var(--veh-accent); opacity:.7}
+
+.sec-title-en{
+  font-family:var(--font-en);font-size:72px;font-weight:800;
+  line-height:1;letter-spacing:-2px;text-transform:uppercase;
+  margin-bottom:2px;opacity:1;
+}
+.cool .sec-title-en{color:var(--cool-accent)}
+.veh  .sec-title-en{color:var(--veh-accent)}
+
+.sec-title-ar{
+  font-family:var(--font-ar);font-size:24px;font-weight:700;
+  color:var(--text-dim);line-height:1.2;margin-bottom:16px;
+}
+/* عند الإنجليزية: نغير الخط فقط */
+body.lang-en .sec-title-ar{
+  font-family:var(--font-en);font-size:20px;font-weight:600;
+}
+
+.title-row{position:relative;width:100%;display:flex;flex-direction:column;align-items:center;padding:20px 0}
+.bar{width:36px;height:3px;border-radius:2px;margin-bottom:24px;flex-shrink:0}
+.cool .bar{background:var(--cool-accent)}
+.veh  .bar{background:var(--veh-accent)}
+
+.items{list-style:none;display:flex;flex-direction:column;gap:10px;width:100%;max-width:340px}
+
+.item{display:flex;align-items:flex-start;gap:12px;transition:transform .2s}
+.item:hover{transform:translateY(-1px)}
+
+.dot{width:5px;height:5px;border-radius:50%;margin-top:9px;flex-shrink:0;opacity:.7}
+.cool .dot{background:var(--cool-accent)}
+.veh  .dot{background:var(--veh-accent)}
+
+.item-text-wrap{text-align:right}
+.sec-text{display:contents}
+
+.item-main{font-size:15px;font-weight:700;color:var(--text-main);line-height:1.5}
+.item-sub{ font-size:11.5px;color:var(--text-dim);font-family:var(--font-en);letter-spacing:.2px;margin-top:2px}
+
+body.lang-en .item{
+  direction:ltr;              /* يقلب الـ flex: النقطة يسار، النص يمين */
+}
+body.lang-en .item-main{font-family:var(--font-en);font-size:14px}
+body.lang-en .item-text-wrap{text-align:left}
+body.lang-en .item-sub{text-align:left;font-size:11px}
+
+/* ─── ANIMATIONS ─────────────────────────────────── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+
+.sec-main>*{animation:fadeUp .65s ease both}
+.sec-main>*:nth-child(1){animation-delay:.04s}
+.sec-main>*:nth-child(2){animation-delay:.11s}
+.sec-main>*:nth-child(3){animation-delay:.18s}
+.sec-main>*:nth-child(4){animation-delay:.25s}
+.sec-main>*:nth-child(5){animation-delay:.32s}
+.sec-main>*:nth-child(6){animation-delay:.39s}
+
+/* ─── MOBILE ─────────────────────────────────────── */
+@media(max-width:860px){
+  html,body{height:auto;overflow:visible}
+  body{min-height:calc(100dvh + 1px);overflow-y:auto;-webkit-overflow-scrolling:touch}
+
+  .page{flex-direction:column;height:100dvh;overflow:hidden}
+
+  .divider{
+    width:100%;height:1px;
+    transition:height var(--dur) var(--ease), opacity calc(var(--dur)*0.5) ease;
+  }
+  .page.expanded-cool .divider,
+  .page.expanded-veh  .divider{height:0;width:100%;opacity:0}
+
+  #langBtn{top:50%;bottom:auto;left:50%;transform:translate(-50%,-50%)}
+
+  .sec{
+    width:100% !important;
+    max-width:100% !important;
+    height:50%;
+    max-height:50dvh;
+    transition:max-height var(--dur) var(--ease), height var(--dur) var(--ease);
+  }
+
+  .page.expanded-cool .cool{max-height:100dvh !important;height:100dvh !important}
+  .page.expanded-cool .veh {max-height:0     !important;height:0     !important}
+  .page.expanded-veh .veh {max-height:100dvh !important;height:100dvh !important}
+  .page.expanded-veh .cool{max-height:0     !important;height:0     !important}
+
+  /* layout أفقي: شعار يمين، نص يساره — وسَط المحتوى */
+  .sec-main{
+    flex-direction:row;
+    align-items:center;
+    justify-content:center;
+    padding:16px 20px;
+    min-width:0;
+    gap:16px;
+    height:100%;
+    overflow:hidden;
+  }
+
+  .sec-logo{height:48px;width:auto;max-width:64px;margin-bottom:0;flex-shrink:0}
+
+  .sec-text{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    flex:1;
+    min-width:0;
+    text-align:center;
+  }
+
+  .sec-title-ar{font-size:clamp(13px,3.2vw,18px);margin-bottom:2px}
+  .sec-title-en{font-size:clamp(26px,7vw,42px);margin-bottom:0}
+  .bar{margin-bottom:6px}
+
+  .sec:not(.is-expanded) .title-row{
+    display:flex;
+    flex-direction:column;      /* COOLING فوق، العربي تحت */
+    align-items:center;
+    gap:1px;
+    padding:12px 0;
+  }
+  .sec:not(.is-expanded) .title-row::before{left:-20px;right:-20px}
+  .sec:not(.is-expanded) .sec-title-en{
+    font-size:clamp(26px,7vw,42px);
+    opacity:1;
+    margin-bottom:0;
+  }
+  .sec:not(.is-expanded) .bar{display:none}
+
+  .sec:not(.is-expanded) .items{gap:4px;max-width:100%}
+  .sec:not(.is-expanded) .item-main{font-size:clamp(10px,2.6vw,12.5px)}
+  .sec:not(.is-expanded) .item-sub{font-size:clamp(8px,2vw,10px)}
+  .sec:not(.is-expanded) .item{gap:5px}
+  .sec:not(.is-expanded) .dot{width:3px;height:3px;margin-top:5px}
+
+  .sec-main::after{display:none}
+  .page.expanded-cool .cool .sec-main:hover,
+  .page.expanded-veh  .veh  .sec-main:hover{background:#fff}
+  .sec-inner{overflow-y:auto;-webkit-overflow-scrolling:touch}
+}
+
+/* ─── LANDSCAPE MOBILE ──────────────────────────── */
+@media(max-width:860px) and (orientation:landscape){
+  .sec{
+    overflow:hidden;
+  }
+  .sec-main{
+    flex-direction:column;      /* رصّ عمودي للاستفادة من العرض */
+    align-items:center;
+    justify-content:center;
+    padding:8px 16px;
+    gap:4px;
+    height:100%;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+    text-align:center;
+  }
+  .sec-logo{height:28px;max-width:40px;margin-bottom:0}
+
+  .sec-text{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    flex:1;
+    min-width:0;
+    text-align:center;
+    max-width:500px;            /* لا يتمدد كثيراً */
+  }
+
+  .sec:not(.is-expanded) .sec-title-ar{font-size:clamp(9px,2.2vh,13px)}
+  .sec:not(.is-expanded) .sec-title-en{font-size:clamp(16px,4.2vh,24px);opacity:1}
+  .sec:not(.is-expanded) .item-main{font-size:clamp(8px,2vh,10px)}
+  .sec:not(.is-expanded) .item-sub{font-size:clamp(6.5px,1.6vh,8px)}
+  .sec:not(.is-expanded) .items{gap:1px}
+  .sec:not(.is-expanded) .item{gap:3px}
+  .sec:not(.is-expanded) .dot{width:2px;height:2px;margin-top:3px}
+  .sec:not(.is-expanded) .title-row{gap:1px;justify-content:center;flex-direction:column;padding:8px 0}
+  .sec:not(.is-expanded) .title-row::before{left:-16px;right:-16px}
+  .sec:not(.is-expanded) .item{justify-content:center}
+
+  .sec-title-ar{font-size:clamp(10px,2.6vh,14px);margin-bottom:1px}
+  .sec-title-en{font-size:clamp(18px,4.8vh,26px);margin-bottom:0}
+  .bar{margin-bottom:2px}
+
+  .sec-main::after{display:none}
+  .sec-inner{padding:16px 16px}
+  .back-btn{position:static;margin-top:auto;transform:none}
+}
 </style>
 </head>
 <body>
 
-<!-- TOP BAR -->
-<div class="topbar">
-  <h1>⬡ VOLGA Editor</h1>
-  <button class="btn primary" onclick="openFolder()">📂 فتح</button>
-  <button class="btn success" id="saveBtn" disabled onclick="saveFile()">💾 حفظ جديد</button>
-  <div class="sep"></div>
-  <button class="btn" id="previewBtn" disabled onclick="togglePreview()">👁 رفيو</button>
-  <div class="sep"></div>
-  <button class="btn icon" id="undoBtn" disabled onclick="undo()" title="تراجع (Ctrl+Z)">↩</button>
-  <button class="btn icon" id="redoBtn" disabled onclick="redo()" title="إعادة (Ctrl+Y)">↪</button>
-  <div class="sep"></div>
-  <button class="btn sm" id="copyFmtBtn" disabled onclick="copyFormat()" title="نسخ التنسيق">🖌 نسخ</button>
-  <button class="btn sm" id="pasteFmtBtn" disabled onclick="pasteFormat()" title="لصق التنسيق">📋 لصق</button>
-  <div class="sep"></div>
-  <button class="btn sm" onclick="showHiddenElements()">🙈 المخفية</button>
-  <div class="spacer"></div>
-  <span id="status">افتح مجلد المشروع</span>
-</div>
+<div class="page" id="page">
 
-<div class="main">
+  <!-- ══ COOLING ══ أول في DOM = يمين في RTL ════════ -->
+  <div class="sec cool" id="secCool" onclick="expandSection(event,'cool')">
 
-  <!-- PANEL -->
-  <div class="panel">
-    <div class="panel-scroll">
-      <div class="empty" id="emptyState">
-        <div class="ico">🖱</div>
-        <p>اضغط على أي عنصر<br>في الصفحة لتعديله</p>
-        <div class="hint">Ctrl+Z تراجع &nbsp;|&nbsp; Ctrl+Y إعادة<br>Escape لإلغاء التحديد</div>
+    <div class="sec-main">
+      <img src="./volga_havc.png" alt="VOLGA HVAC" class="sec-logo">
+      <div class="sec-text">
+      <div class="title-row">
+      <div class="sec-title-en">COOLING</div>
+      <div class="sec-title-ar" data-ar="حلول التبريد الصناعي" data-en="Industrial Cooling Solutions">حلول التبريد الصناعي</div>
       </div>
-
-      <div id="pc" style="display:none">
-
-        <!-- ELEMENT INFO -->
-        <div class="ps">
-          <div class="ps-head">📌 العنصر</div>
-          <div id="elTag" class="el-tag">—</div>
-          <div class="el-actions">
-            <button class="btn sm" onclick="selectParent()" title="اختر الأب">↑ أب</button>
-            <button class="btn sm" id="hideBtn" onclick="toggleHide()">👁 إخفاء</button>
-            <button class="btn sm" onclick="duplicateEl()">⧉ نسخ</button>
-            <button class="btn sm danger" onclick="deleteEl()">🗑 حذف</button>
-            <button class="btn sm" onclick="deselectEl()">✕</button>
-          </div>
-        </div>
-
-        <!-- TEXT -->
-        <div class="ps" id="textSec">
-          <div class="ps-head">✍️ النص</div>
-          <textarea id="elText" rows="3"
-            oninput="liveText(this.value)"
-            onchange="commitText(this.value)"></textarea>
-        </div>
-
-        <!-- TYPOGRAPHY -->
-        <div class="ps">
-          <div class="ps-head">🔤 الخط</div>
-          <div class="row">
-            <span class="lbl">الحجم</span>
-            <input type="range" id="fsRange" min="8" max="140" value="16"
-              oninput="liveApply('fontSize',this.value+'px');fsNum.value=this.value"
-              onchange="commitApply('fontSize',this.value+'px')">
-            <input type="number" class="num-sm" id="fsNum" value="16" min="1" max="400"
-              oninput="liveApply('fontSize',this.value+'px');fsRange.value=Math.min(this.value,140)"
-              onchange="commitApply('fontSize',this.value+'px')">
-          </div>
-          <div class="row">
-            <span class="lbl">وزن</span>
-            <div class="tg">
-              <button class="btn sm" id="fw300" onclick="commitApply('fontWeight','300')">رفيع</button>
-              <button class="btn sm" id="fw400" onclick="commitApply('fontWeight','400')">عادي</button>
-              <button class="btn sm" id="fw700" onclick="commitApply('fontWeight','700')">عريض</button>
-              <button class="btn sm" id="fw900" onclick="commitApply('fontWeight','900')">أعرض</button>
-            </div>
-          </div>
-          <div class="row">
-            <span class="lbl">محاذاة</span>
-            <div class="tg">
-              <button class="btn sm" id="taR" onclick="commitApply('textAlign','right')">⬤ي</button>
-              <button class="btn sm" id="taC" onclick="commitApply('textAlign','center')">⬤و</button>
-              <button class="btn sm" id="taL" onclick="commitApply('textAlign','left')">⬤ي</button>
-            </div>
-          </div>
-          <div class="row">
-            <span class="lbl">لون النص</span>
-            <div class="color-pair">
-              <input type="color" id="clrTxt"
-                oninput="hexTxt.value=this.value;liveApply('color',this.value)"
-                onchange="commitApply('color',this.value)">
-              <input type="text" class="hex-inp" id="hexTxt" maxlength="9" placeholder="#111111"
-                oninput="onHexInput('clrTxt','hexTxt','color',this.value)">
-            </div>
-          </div>
-          <div class="row">
-            <span class="lbl">تباعد</span>
-            <input type="range" id="lsR" min="-3" max="20" step="0.5" value="0"
-              oninput="liveApply('letterSpacing',this.value+'px');lsN.value=parseFloat(this.value).toFixed(1)"
-              onchange="commitApply('letterSpacing',this.value+'px')">
-            <input type="number" class="num-sm" id="lsN" value="0" step="0.5"
-              oninput="liveApply('letterSpacing',this.value+'px');lsR.value=this.value"
-              onchange="commitApply('letterSpacing',this.value+'px')">
-          </div>
-          <div class="row">
-            <span class="lbl">ارتفاع سطر</span>
-            <input type="range" id="lhR" min="0.8" max="3.5" step="0.05" value="1.5"
-              oninput="liveApply('lineHeight',this.value);lhN.value=parseFloat(this.value).toFixed(2)"
-              onchange="commitApply('lineHeight',this.value)">
-            <input type="number" class="num-sm" id="lhN" value="1.5" step="0.05"
-              oninput="liveApply('lineHeight',this.value);lhR.value=this.value"
-              onchange="commitApply('lineHeight',this.value)">
-          </div>
-          <div class="row">
-            <span class="lbl w64">text-transform</span>
-            <select onchange="commitApply('textTransform',this.value)">
-              <option value="">—</option>
-              <option value="uppercase">UPPERCASE</option>
-              <option value="lowercase">lowercase</option>
-              <option value="capitalize">Capitalize</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- BACKGROUND + OPACITY -->
-        <div class="ps">
-          <div class="ps-head">🎨 خلفية وشفافية</div>
-          <div class="row">
-            <span class="lbl">الخلفية</span>
-            <div class="color-pair">
-              <input type="color" id="clrBg"
-                oninput="hexBg.value=this.value;liveApply('backgroundColor',this.value)"
-                onchange="commitApply('backgroundColor',this.value)">
-              <input type="text" class="hex-inp" id="hexBg" maxlength="9" placeholder="#ffffff"
-                oninput="onHexInput('clrBg','hexBg','backgroundColor',this.value)">
-              <button class="btn sm" onclick="hexBg.value='';liveApply('backgroundColor','transparent');commitApply('backgroundColor','transparent')">شفاف</button>
-            </div>
-          </div>
-          <div class="row">
-            <span class="lbl">شفافية</span>
-            <input type="range" id="opR" min="0" max="1" step="0.01" value="1"
-              oninput="liveApply('opacity',this.value);opN.value=Math.round(this.value*100)+'%'"
-              onchange="commitApply('opacity',this.value)">
-            <input type="text" class="num-sm" id="opN" value="100%" readonly style="background:#f0f0f0">
-          </div>
-        </div>
-
-        <!-- SIZE -->
-        <div class="ps">
-          <div class="ps-head">📏 الحجم</div>
-          <div class="row">
-            <span class="lbl">العرض</span>
-            <input type="text" placeholder="auto | 100% | 240px"
-              onchange="commitApply('width',this.value)">
-          </div>
-          <div class="row">
-            <span class="lbl">الارتفاع</span>
-            <input type="text" placeholder="auto | 100% | 240px"
-              onchange="commitApply('height',this.value)">
-          </div>
-          <div class="row">
-            <span class="lbl">max-width</span>
-            <input type="text" placeholder="none | 600px"
-              onchange="commitApply('maxWidth',this.value)">
-          </div>
-          <div class="row">
-            <span class="lbl w64">object-fit</span>
-            <select onchange="commitApply('objectFit',this.value)">
-              <option value="">—</option>
-              <option value="contain">contain</option>
-              <option value="cover">cover</option>
-              <option value="fill">fill</option>
-              <option value="none">none</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- BORDER -->
-        <div class="ps">
-          <div class="ps-head">🔲 الإطار والزوايا</div>
-          <div class="row">
-            <span class="lbl">زوايا</span>
-            <input type="range" id="brR" min="0" max="60" step="1" value="0"
-              oninput="liveApply('borderRadius',this.value+'px');brN.value=this.value+'px'"
-              onchange="commitApply('borderRadius',this.value+'px')">
-            <input type="text" class="num-sm" id="brN" value="0px"
-              onchange="liveApply('borderRadius',this.value);commitApply('borderRadius',this.value)">
-          </div>
-          <div class="row">
-            <span class="lbl">سمك الإطار</span>
-            <input type="range" min="0" max="10" step="1" value="0"
-              oninput="liveApply('borderWidth',this.value+'px')"
-              onchange="commitApply('borderWidth',this.value+'px')">
-          </div>
-          <div class="row">
-            <span class="lbl">نوع الإطار</span>
-            <select onchange="commitApply('borderStyle',this.value)">
-              <option value="solid">solid</option>
-              <option value="dashed">dashed</option>
-              <option value="dotted">dotted</option>
-              <option value="none">none</option>
-            </select>
-          </div>
-          <div class="row">
-            <span class="lbl">لون الإطار</span>
-            <div class="color-pair">
-              <input type="color" id="clrBrd"
-                oninput="hexBrd.value=this.value;liveApply('borderColor',this.value)"
-                onchange="commitApply('borderColor',this.value)">
-              <input type="text" class="hex-inp" id="hexBrd" maxlength="9" placeholder="#cccccc"
-                oninput="onHexInput('clrBrd','hexBrd','borderColor',this.value)">
-            </div>
-          </div>
-        </div>
-
-        <!-- SPACING -->
-        <div class="ps">
-          <div class="ps-head">📐 مسافات داخلية — padding</div>
-          <div class="sp-grid">
-            <div class="sp-item"><label>أعلى</label>
-              <input type="number" id="pt" min="0"
-                oninput="liveApply('paddingTop',this.value+'px')"
-                onchange="commitApply('paddingTop',this.value+'px')"></div>
-            <div class="sp-item"><label>أسفل</label>
-              <input type="number" id="pb" min="0"
-                oninput="liveApply('paddingBottom',this.value+'px')"
-                onchange="commitApply('paddingBottom',this.value+'px')"></div>
-            <div class="sp-item"><label>يمين</label>
-              <input type="number" id="pr" min="0"
-                oninput="liveApply('paddingRight',this.value+'px')"
-                onchange="commitApply('paddingRight',this.value+'px')"></div>
-            <div class="sp-item"><label>يسار</label>
-              <input type="number" id="pl" min="0"
-                oninput="liveApply('paddingLeft',this.value+'px')"
-                onchange="commitApply('paddingLeft',this.value+'px')"></div>
-          </div>
-        </div>
-
-        <div class="ps">
-          <div class="ps-head">📐 مسافات خارجية — margin</div>
-          <div class="sp-grid">
-            <div class="sp-item"><label>أعلى</label>
-              <input type="number" id="mt"
-                oninput="liveApply('marginTop',this.value+'px')"
-                onchange="commitApply('marginTop',this.value+'px')"></div>
-            <div class="sp-item"><label>أسفل</label>
-              <input type="number" id="mb"
-                oninput="liveApply('marginBottom',this.value+'px')"
-                onchange="commitApply('marginBottom',this.value+'px')"></div>
-            <div class="sp-item"><label>يمين</label>
-              <input type="number" id="mr"
-                oninput="liveApply('marginRight',this.value+'px')"
-                onchange="commitApply('marginRight',this.value+'px')"></div>
-            <div class="sp-item"><label>يسار</label>
-              <input type="number" id="ml"
-                oninput="liveApply('marginLeft',this.value+'px')"
-                onchange="commitApply('marginLeft',this.value+'px')"></div>
-          </div>
-        </div>
-
-        <!-- IMAGE INFO -->
-        <div class="ps" id="imgSec" style="display:none">
-          <div class="ps-head">🖼 الصورة</div>
-          <div style="font-size:11px;color:var(--dim);background:#f5f5f5;padding:6px 8px;border-radius:6px;font-family:monospace;word-break:break-all" id="imgSrcLbl">—</div>
-        </div>
-
-<!-- IMAGE INSERT -->
-        <div class="ps" id="imgInsertSec">
-          <div class="ps-head">📸 إدراج صورة عند العنصر</div>
-          <div class="row">
-            <span class="lbl w64">موضع</span>
-            <select id="iposSelect" style="flex:1">
-              <option value="right">← يمين (float)</option>
-              <option value="left">يسار → (float)</option>
-              <option value="top">▲ فوق</option>
-              <option value="bottom">▼ تحت</option>
-              <option value="center">⊙ مركز (overlay)</option>
-            </select>
-          </div>
-          <div class="row">
-            <span class="lbl w64">الطبقة</span>
-            <div class="tg">
-              <button class="btn sm active" id="ilayer-front" onclick="selImgLayer('front')">▲ أمام</button>
-              <button class="btn sm" id="ilayer-back" onclick="selImgLayer('back')">▼ خلف</button>
-            </div>
-          </div>
-          <div class="row">
-            <span class="lbl w64">الحجم</span>
-            <input type="text" id="iImgSize" placeholder="120px | 50% | auto" value="120px">
-          </div>
-          <button class="btn primary" style="width:100%;margin-top:4px" onclick="insertImageFromPanel()">📂 اختر صورة وأدرجها</button>
-        </div>
-
-        <!-- CSS DIRECT -->
-        <div class="ps">
-          <div class="ps-head">⚙️ CSS مباشر</div>
-          <textarea id="cssRaw" rows="3" dir="ltr" placeholder="border-radius: 12px; opacity: 0.8;"
-            onchange="commitRawCSS(this.value)"></textarea>
-          <div style="font-size:10.5px;color:var(--dim);margin-top:5px">
-            اكتب خصائص CSS مباشرة — مفصولة بـ ;
-          </div>
-        </div>
-
+      <div class="bar"></div>
+      <ul class="items">
+        <li class="item"><div class="dot"></div><div class="item-text-wrap">
+          <div class="item-main" data-ar="أبراج التبريد" data-en="Cooling Towers">أبراج التبريد</div>
+        </div></li>
+        <li class="item"><div class="dot"></div><div class="item-text-wrap">
+          <div class="item-main" data-ar="شيلرات تبريد المياه" data-en="Water Chillers">شيلرات تبريد المياه</div>
+        </div></li>
+        <li class="item"><div class="dot"></div><div class="item-text-wrap">
+          <div class="item-main" data-ar="المبادلات الحرارية" data-en="Heat Exchangers">المبادلات الحرارية</div>
+          <div class="item-sub">Shell &amp; Tube — Plate Type</div>
+        </div></li>
+        <li class="item"><div class="dot"></div><div class="item-text-wrap">
+          <div class="item-main" data-ar="الكويلات والرديتيرات" data-en="Coils &amp; Radiators">الكويلات والرديتيرات</div>
+          <div class="item-sub" data-ar="كوندنسر — إيفابوريتر" data-en="Condenser — Evaporator">كوندنسر — إيفابوريتر</div>
+        </div></li>
+        <li class="item"><div class="dot"></div><div class="item-text-wrap">
+          <div class="item-main" data-ar="غرف التبريد والتجميد" data-en="Cold &amp; Freezing Rooms">غرف التبريد والتجميد</div>
+        </div></li>
+        <li class="item"><div class="dot"></div><div class="item-text-wrap">
+          <div class="item-main" data-ar="وحدات تبريد وتجميد المركبات" data-en="Vehicle Refrigeration Units">وحدات تبريد وتجميد المركبات</div>
+        </div></li>
+      </ul>
       </div>
     </div>
+
+    <!-- محتوى داخلي — فارغ حالياً -->
+    <div class="sec-inner">
+      <p style="color:#ccc;font-size:13px;letter-spacing:1px;font-family:var(--font-en);text-transform:uppercase"
+         data-ar="قريباً — منتجات التبريد الصناعي"
+         data-en="Coming Soon — Cooling Products">
+        قريباً — منتجات التبريد الصناعي
+      </p>
+      <button class="back-btn" onclick="collapseAll(event)"
+              data-ar="← القائمة الرئيسية"
+              data-en="← Main Menu">← القائمة الرئيسية</button>
+    </div>
+
   </div>
 
-  <!-- PREVIEW -->
-  <div class="preview-wrap">
-    <div class="preview-bar">
-      <span id="previewPath">لا يوجد ملف محمّل</span>
-      <div style="flex:1"></div>
-      <label style="font-size:11px;color:var(--dim);margin-left:4px">تكبير:</label>
-      <select id="zoomSel" onchange="setZoom(this.value)" style="font-size:12px;padding:3px 6px;border-radius:5px;border:1px solid var(--border)">
-        <option value="1">100%</option>
-        <option value="0.75">75%</option>
-        <option value="0.5">50%</option>
-        <option value="1.25">125%</option>
-      </select>
+  <!-- ══ DIVIDER + زر اللغة ════════════════════════ -->
+  <div class="divider">
+    <button id="langBtn" onclick="toggleLang()">EN</button>
+  </div>
+
+  <!-- ══ VEHICLES ══ آخر في DOM = يسار في RTL ══════ -->
+  <div class="sec veh" id="secVeh" onclick="expandSection(event,'veh')">
+
+    <div class="sec-main">
+      <img src="./volga_svs.png" alt="VOLGA Vehicles" class="sec-logo">
+      <div class="sec-text">
+      <div class="title-row">
+      <div class="sec-title-en">VEHICLES</div>
+      <div class="sec-title-ar" data-ar="حلول المركبات" data-en="Vehicle Solutions">حلول المركبات</div>
+      </div>
+      <div class="bar"></div>
+      <ul class="items">
+        <li class="item"><div class="dot"></div><div class="item-text-wrap">
+          <div class="item-main" data-ar="صناديق جافة ومبردة ومجمدة" data-en="Dry, Refrigerated &amp; Frozen Boxes">صناديق جافة ومبردة ومجمدة</div>
+          <div class="item-sub" data-ar="للمركبات والفانات والشاحنات" data-en="For vehicles, vans &amp; trucks">للمركبات والفانات والشاحنات</div>
+        </div></li>
+        <li class="item"><div class="dot"></div><div class="item-text-wrap">
+          <div class="item-main" data-ar="تجهيز سيارات الإسعاف وتعديلها" data-en="Ambulance Fitting &amp; Modification">تجهيز سيارات الإسعاف وتعديلها</div>
+          <div class="item-sub" data-ar="تحويل السيارات وتوفير المعدات الطبية" data-en="Conversion &amp; medical equipment supply">تحويل السيارات وتوفير المعدات الطبية</div>
+        </div></li>
+        <li class="item"><div class="dot"></div><div class="item-text-wrap">
+          <div class="item-main" data-ar="مركبات ذوي الاحتياجات الخاصة" data-en="Special Needs Vehicle Solutions">مركبات ذوي الاحتياجات الخاصة</div>
+          <div class="item-sub" data-ar="رافعات ومقاعد المعاقين" data-en="Wheelchair lifts &amp; accessibility seating">رافعات ومقاعد المعاقين</div>
+        </div></li>
+        <li class="item"><div class="dot"></div><div class="item-text-wrap">
+          <div class="item-main" data-ar="الرافعات الذيلية للشاحنات" data-en="Truck Tail Lifts">الرافعات الذيلية للشاحنات</div>
+          <!-- ✅ data-ar + data-en للوزن -->
+          <div class="item-sub" data-ar="1.5 إلى 2 طن" data-en="1.5 to 2 Tons">1.5 إلى 2 طن</div>
+        </div></li>
+        <li class="item"><div class="dot"></div><div class="item-text-wrap">
+          <div class="item-main" data-ar="تحويل السيارات إلى موبيليتي" data-en="Vehicle Mobility Conversion">تحويل السيارات إلى موبيليتي</div>
+        </div></li>
+      </ul>
+      </div>
     </div>
-    <div class="preview-container">
-      <iframe id="preview" title="preview"></iframe>
+
+    <!-- محتوى داخلي — فارغ حالياً -->
+    <div class="sec-inner">
+      <p style="color:#ccc;font-size:13px;letter-spacing:1px;font-family:var(--font-en);text-transform:uppercase"
+         data-ar="قريباً — حلول المركبات"
+         data-en="Coming Soon — Vehicle Solutions">
+        قريباً — حلول المركبات
+      </p>
+      <button class="back-btn" onclick="collapseAll(event)"
+              data-ar="القائمة الرئيسية →"
+              data-en="Main Menu →">القائمة الرئيسية →</button>
     </div>
+
   </div>
 
 </div>
 
 <script>
-/* ═══════════════════════════════════════
-   STATE
-═══════════════════════════════════════ */
-let dirHandle = null, indexHandle = null;
-let selectedEl = null;
-let copiedFormat = null;
-let previewMode = false;
-const blobUrls = new Map();
+  let isAr = true;
+  let isExpanded = false;
 
-// HISTORY
-const hist = [];
-let histIdx = -1;
-const MAX_HIST = 60;
-
-// Last known values (for diff on commit)
-const prev = {};
-
-/* ═══════════════════════════════════════
-   OPEN + LOAD
-═══════════════════════════════════════ */
-async function openFolder() {
-  try {
-    dirHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
-    const htmlFiles = [];
-    for await (const [name, handle] of dirHandle.entries()) {
-      if (handle.kind === 'file' && name.endsWith('.html') && !name.includes('editor'))
-        htmlFiles.push({ name, handle });
-    }
-    if (!htmlFiles.length) { setStatus('✕ لا توجد ملفات HTML'); return; }
-    if (htmlFiles.length === 1) { await loadHtml(htmlFiles[0]); return; }
-    showPicker(htmlFiles);
-  } catch(e) { if (e.name !== 'AbortError') setStatus('✕ ' + e.message); }
-}
-
-function showPicker(files) {
-  const ov = document.createElement('div');
-  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:999;display:flex;align-items:center;justify-content:center';
-  ov.innerHTML=`<div style="background:#fff;border-radius:14px;padding:22px;min-width:260px;font-family:Tajawal,sans-serif">
-    <div style="font-size:15px;font-weight:700;margin-bottom:14px;text-align:center">اختر الملف</div>
-    ${files.map((f,i)=>`<button onclick="window._pf[${i}]()" style="display:block;width:100%;margin-bottom:7px;padding:10px 14px;border:1px solid #e0e0e0;border-radius:8px;background:#f9f9f9;cursor:pointer;font-family:Tajawal,sans-serif;font-size:14px;text-align:right">📄 ${f.name}</button>`).join('')}
-    <button onclick="this.closest('div').parentElement.remove()" style="display:block;width:100%;padding:7px;border:1px solid #ccc;border-radius:8px;background:#fff;cursor:pointer;font-family:Tajawal,sans-serif;font-size:13px;color:#888">إلغاء</button>
-  </div>`;
-  document.body.appendChild(ov);
-  window._pf = files.map(f => async () => { ov.remove(); await loadHtml(f); });
-}
-
-async function loadHtml({ handle, name }) {
-  indexHandle = handle;
-  const file = await indexHandle.getFile();
-  const html = await file.text();
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(html, 'text/html');
-  blobUrls.clear();
-  for (const img of doc.querySelectorAll('img[src]')) {
-    const src = img.getAttribute('src');
-    if (!src.startsWith('http') && !src.startsWith('data:') && !src.startsWith('blob:')) {
-      try {
-        const fh = await dirHandle.getFileHandle(src.replace(/^\.\//, ''));
-        const blob = URL.createObjectURL(await fh.getFile());
-        blobUrls.set(blob, src);
-        img.setAttribute('src', blob);
-      } catch(e) {}
-    }
-  }
-  const iframe = document.getElementById('preview');
-  iframe.srcdoc = '<!DOCTYPE html>' + doc.documentElement.outerHTML;
-  iframe.onload = setupIframe;
-  document.getElementById('saveBtn').disabled = false;
-  document.getElementById('previewBtn').disabled = false;
-  document.getElementById('previewPath').textContent = name + ' ← ' + dirHandle.name;
-  setStatus('✓ تم تحميل ' + name);
-  hist.length = 0; histIdx = -1; updateHistBtns();
-}
-
-/* ═══════════════════════════════════════
-   IFRAME SETUP
-═══════════════════════════════════════ */
-function setupIframe() {
-  const doc = getDoc();
-  if (!doc) return;
-  // Remove old listeners
-  doc.removeEventListener('click', onIframeClick, true);
-  doc.removeEventListener('click', onPreviewClick, true);
-
-  if (previewMode) {
-    // Preview: no edit styles, links navigate
-    const ve = doc.getElementById('_ve'); if (ve) ve.remove();
-    doc.addEventListener('click', onPreviewClick, true);
-  } else {
-    // Edit mode: add outline styles + click to select
-    let st = doc.getElementById('_ve');
-    if (!st) { st = doc.createElement('style'); st.id = '_ve'; doc.head.appendChild(st); }
-    st.textContent = `*{cursor:pointer!important}._sel{outline:2.5px solid #0e6db5!important;outline-offset:2px!important}*:hover:not(._sel){outline:1px dashed rgba(14,109,181,.3)!important;outline-offset:1px}`;
-    doc.addEventListener('click', onIframeClick, true);
-  }
-}
-
-function onIframeClick(e) {
-  e.preventDefault(); e.stopPropagation();
-  const doc = getDoc();
-  doc.querySelectorAll('._sel').forEach(el => el.classList.remove('_sel'));
-  selectedEl = e.target;
-  selectedEl.classList.add('_sel');
-  populatePanel();
-}
-
-/* ═══════════════════════════════════════
-   PREVIEW MODE
-═══════════════════════════════════════ */
-function togglePreview() {
-  previewMode = !previewMode;
-  const btn = document.getElementById('previewBtn');
-  const panel = document.getElementById('pc');
-  const empty = document.getElementById('emptyState');
-
-  if (previewMode) {
-    btn.textContent = '✏️ تحرير';
-    btn.classList.add('active');
-    // Deselect + hide panel controls
-    deselectEl();
-    panel.style.pointerEvents = 'none';
-    panel.style.opacity = '0.35';
-    empty.style.pointerEvents = 'none';
-    setStatus('👁 وضع المعاينة — اضغط تحرير للعودة');
-  } else {
-    btn.textContent = '👁 رفيو';
-    btn.classList.remove('active');
-    panel.style.pointerEvents = '';
-    panel.style.opacity = '';
-    empty.style.pointerEvents = '';
-    setStatus('✏️ وضع التحرير');
-  }
-  // Re-setup iframe with correct mode
-  setupIframe();
-}
-
-async function onPreviewClick(e) {
-  // Allow buttons/interactive elements to work
-  const link = e.target.closest('a[href]');
-  if (link) {
-    const href = link.getAttribute('href');
-    // Internal HTML pages: load via dirHandle
-    if (href && !href.startsWith('http') && !href.startsWith('#') && href.endsWith('.html')) {
-      e.preventDefault(); e.stopPropagation();
-      if (!dirHandle) { setStatus('✕ افتح المجلد أولاً'); return; }
-      try {
-        const fh = await dirHandle.getFileHandle(href.replace(/^\.\//, ''));
-        await loadHtml({ handle: fh, name: href });
-        // loadHtml calls setupIframe which will apply preview mode correctly
-      } catch(err) { setStatus('✕ لم يُعثر على: ' + href); }
-    }
-    // External links: let through
-  }
-  // All other clicks (buttons etc.) pass through normally
-}
-
-function getDoc() { return document.getElementById('preview').contentDocument; }
-
-/* ═══════════════════════════════════════
-   PANEL
-═══════════════════════════════════════ */
-function populatePanel() {
-  if (!selectedEl) { showEmpty(); return; }
-  document.getElementById('emptyState').style.display = 'none';
-  document.getElementById('pc').style.display = 'block';
-
-  const el = selectedEl;
-  const cs = el.ownerDocument.defaultView.getComputedStyle(el);
-  const tag = el.tagName.toLowerCase();
-  const cls = [...el.classList].filter(c => c !== '_sel').map(c => '.'+c).join('');
-  document.getElementById('elTag').textContent = tag + cls;
-
-  // Text
-  const isLeaf = el.children.length === 0 && tag !== 'img';
-  document.getElementById('textSec').style.display = isLeaf ? 'block' : 'none';
-  if (isLeaf) document.getElementById('elText').value = el.textContent;
-
-  // Font size
-  const fs = Math.round(parseFloat(cs.fontSize)) || 16;
-  setV('fsRange', Math.min(fs,140)); setV('fsNum', fs);
-  prev.fontSize = fs + 'px';
-
-  // Font weight
-  const fw = parseInt(cs.fontWeight) || 400;
-  ['300','400','700','900'].forEach(w => document.getElementById('fw'+w).classList.remove('active'));
-  const closest = [300,400,700,900].reduce((a,b) => Math.abs(b-fw)<Math.abs(a-fw)?b:a);
-  document.getElementById('fw'+closest).classList.add('active');
-
-  // Text align
-  ['taR','taC','taL'].forEach(id => document.getElementById(id).classList.remove('active'));
-  const ta = cs.textAlign; const taMap={right:'taR',center:'taC',left:'taL',start:'taR',end:'taL'};
-  if (taMap[ta]) document.getElementById(taMap[ta]).classList.add('active');
-
-  // Colors
-  const clr = rgbToHex(cs.color);
-  setV('clrTxt', clr); setV('hexTxt', clr); prev.color = clr;
-
-  const bg = cs.backgroundColor;
-  const bgHex = bg === 'rgba(0, 0, 0, 0)' || bg === 'transparent' ? '' : rgbToHex(bg);
-  setV('clrBg', bgHex || '#ffffff'); setV('hexBg', bgHex); prev.backgroundColor = bgHex;
-
-  // Letter spacing
-  const ls = parseFloat(cs.letterSpacing) || 0;
-  setV('lsR', ls); setV('lsN', ls.toFixed(1)); prev.letterSpacing = ls+'px';
-
-  // Line height
-  const lhPx = parseFloat(cs.lineHeight);
-  const lhRatio = isNaN(lhPx) ? 1.5 : +(lhPx / parseFloat(cs.fontSize)).toFixed(2);
-  setV('lhR', lhRatio); setV('lhN', lhRatio); prev.lineHeight = lhRatio;
-
-  // Opacity
-  const op = parseFloat(el.style.opacity ?? cs.opacity) ?? 1;
-  setV('opR', op); setV('opN', Math.round(op*100)+'%'); prev.opacity = op;
-
-  // Border radius
-  const br = el.style.borderRadius || '0px';
-  setV('brR', parseInt(br) || 0); setV('brN', br); prev.borderRadius = br;
-
-  // Border color
-  const bc = rgbToHex(cs.borderColor); setV('clrBrd', bc); setV('hexBrd', bc);
-
-  // Padding
-  setV('pt', Math.round(parseFloat(cs.paddingTop))    || 0);
-  setV('pb', Math.round(parseFloat(cs.paddingBottom)) || 0);
-  setV('pr', Math.round(parseFloat(cs.paddingRight))  || 0);
-  setV('pl', Math.round(parseFloat(cs.paddingLeft))   || 0);
-
-  // Margin
-  setV('mt', Math.round(parseFloat(cs.marginTop))    || 0);
-  setV('mb', Math.round(parseFloat(cs.marginBottom)) || 0);
-  setV('mr', Math.round(parseFloat(cs.marginRight))  || 0);
-  setV('ml', Math.round(parseFloat(cs.marginLeft))   || 0);
-
-  // Hide state
-  document.getElementById('hideBtn').textContent = el.style.display === 'none' ? '👁 إظهار' : '👁 إخفاء';
-
-  // Image
-  const imgSec = document.getElementById('imgSec');
-  if (tag === 'img') {
-    imgSec.style.display = 'block';
-    document.getElementById('imgSrcLbl').textContent = blobUrls.get(el.src) || el.getAttribute('src');
-  } else { imgSec.style.display = 'none'; }
-
-// Image Insert section — always visible when element selected
-  document.getElementById('imgInsertSec').style.display = 'block';
-
-  // Raw CSS
-  setV('cssRaw', el.getAttribute('style') || '');
-
-  // Enable buttons
-  document.getElementById('copyFmtBtn').disabled = false;
-}
-
-function showEmpty() {
-  document.getElementById('emptyState').style.display = 'flex';
-  document.getElementById('pc').style.display = 'none';
-  document.getElementById('copyFmtBtn').disabled = true;
-  document.getElementById('imgInsertSec').style.display = 'none';
-}
-
-/* ═══════════════════════════════════════
-   APPLY — LIVE VS COMMIT
-═══════════════════════════════════════ */
-function liveApply(prop, val) {
-  if (!selectedEl) return;
-  selectedEl.style[prop] = val;
-}
-
-function commitApply(prop, val) {
-  if (!selectedEl) return;
-  const oldVal = prev[prop] ?? (selectedEl.style[prop] || '');
-  selectedEl.style[prop] = val;
-  if (String(oldVal) !== String(val)) record({ el: selectedEl, prop, oldVal, newVal: val });
-  prev[prop] = val;
-  // Refresh active states for weight/align
-  if (prop === 'fontWeight') {
-    ['300','400','700','900'].forEach(w => document.getElementById('fw'+w).classList.remove('active'));
-    document.getElementById('fw'+val).classList.add('active');
-  }
-  if (prop === 'textAlign') {
-    ['taR','taC','taL'].forEach(id => document.getElementById(id).classList.remove('active'));
-    const map = {right:'taR',center:'taC',left:'taL'}; if(map[val]) document.getElementById(map[val]).classList.add('active');
-  }
-}
-
-let _prevText = '';
-function liveText(val) { if (selectedEl) selectedEl.textContent = val; }
-function commitText(val) {
-  if (!selectedEl) return;
-  record({ el: selectedEl, prop: '__text', oldVal: _prevText, newVal: val });
-  _prevText = val;
-}
-
-function commitRawCSS(val) {
-  if (!selectedEl) return;
-  const old = selectedEl.getAttribute('style') || '';
-  val.split(';').forEach(rule => {
-    const [p, ...rest] = rule.split(':');
-    if (p && rest.length) {
-      const prop = p.trim().replace(/-([a-z])/g, (_,c) => c.toUpperCase());
-      selectedEl.style[prop] = rest.join(':').trim();
-    }
+  /* ─── ORIENTATION CHANGE ────────────────────── */
+  let orientTimer;
+  window.addEventListener('resize',()=>{
+    clearTimeout(orientTimer);
+    orientTimer=setTimeout(()=>{
+      // يعيد تثبيت الـ viewport بعد تغيير الاتجاه
+      document.documentElement.style.height=window.innerHeight+'px';
+      document.body.style.height=window.innerHeight+'px';
+    },100);
   });
-  record({ el: selectedEl, prop: '__style', oldVal: old, newVal: selectedEl.getAttribute('style') || '' });
-}
 
-function onHexInput(colorId, hexId, cssProp, val) {
-  if (/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(val)) {
-    document.getElementById(colorId).value = val;
-    liveApply(cssProp, val);
+  function expandSection(e, name) {
+    // تجاهل الضغط إذا كان هناك expand جارٍ
+    if (isExpanded) return;
+    isExpanded = true;
+
+    const page = document.getElementById('page');
+    const secId = name === 'cool' ? 'secCool' : 'secVeh';
+    const sec = document.getElementById(secId);
+
+    // أخفِ المحتوى الرئيسي فوراً (بدون انتظار)
+    sec.classList.add('is-closing');
+
+    // ابدأ توسيع القسم (width/height transition)
+    page.classList.add('expanded-' + name);
+
+    // بعد انتهاء الـ transition أظهر المحتوى الداخلي
+    setTimeout(() => {
+      sec.classList.remove('is-closing');
+      sec.classList.add('is-expanded');
+    }, 420);
   }
-}
 
-/* ═══════════════════════════════════════
-   ELEMENT ACTIONS
-═══════════════════════════════════════ */
-function selectParent() {
-  if (!selectedEl?.parentElement) return;
-  const doc = getDoc();
-  doc.querySelectorAll('._sel').forEach(el => el.classList.remove('_sel'));
-  const parent = selectedEl.parentElement;
-  if (parent.tagName === 'HTML' || parent.tagName === 'BODY') return;
-  selectedEl = parent;
-  selectedEl.classList.add('_sel');
-  populatePanel();
-}
+  function collapseAll(e) {
+    e.stopPropagation();
+    const page = document.getElementById('page');
 
-function deselectEl() {
-  getDoc()?.querySelectorAll('._sel').forEach(el => el.classList.remove('_sel'));
-  selectedEl = null;
-  showEmpty();
-}
+    // أخفِ المحتوى الداخلي أولاً
+    document.querySelectorAll('.sec').forEach(s => s.classList.remove('is-expanded', 'is-closing'));
 
-function toggleHide() {
-  if (!selectedEl) return;
-  const isHidden = selectedEl.style.display === 'none';
-  commitApply('display', isHidden ? '' : 'none');
-  document.getElementById('hideBtn').textContent = isHidden ? '👁 إخفاء' : '👁 إظهار';
-}
+    // ثم أعِد الـ layout بعد ثوانٍ قليلة
+    setTimeout(() => {
+      page.classList.remove('expanded-cool', 'expanded-veh');
+    }, 150);
 
-function duplicateEl() {
-  if (!selectedEl) return;
-  const clone = selectedEl.cloneNode(true);
-  clone.classList.remove('_sel');
-  selectedEl.parentElement.insertBefore(clone, selectedEl.nextSibling);
-  setStatus('✓ تم النسخ');
-}
+    // أعِد تفعيل الـ click بعد انتهاء الـ collapse
+    setTimeout(() => { isExpanded = false; }, 700);
+  }
 
-/* ═══════════════════════════════════════
-   IMAGE INSERT
-═══════════════════════════════════════ */
-let _imgLayer = 'front';
+  function toggleLang() {
+    isAr = !isAr;
+    document.getElementById('langBtn').textContent = isAr ? 'EN' : 'عربي';
 
-function selImgLayer(layer) {
-  _imgLayer = layer;
-  ['front', 'back'].forEach(l => {
-    document.getElementById('ilayer-' + l).classList.toggle('active', l === layer);
-  });
-}
+    // layout ثابت — فقط نغير الـ class للخط + النصوص
+    document.body.classList.toggle('lang-en', !isAr);
 
-async function insertImageFromPanel() {
-  if (!selectedEl) { setStatus('✕ اختر عنصراً أولاً'); return; }
-  if (!dirHandle)  { setStatus('✕ افتح مجلد المشروع أولاً'); return; }
-
-  let imgHandle;
-  try {
-    [imgHandle] = await window.showOpenFilePicker({
-      types: [{ description: 'Images', accept: { 'image/*': ['.png','.jpg','.jpeg','.gif','.svg','.webp'] } }]
+    document.querySelectorAll('[data-ar]').forEach(el => {
+      const val = isAr ? el.getAttribute('data-ar') : el.getAttribute('data-en');
+      if (val) el.textContent = val;
     });
-  } catch(e) { return; }
-
-  const imgFile  = await imgHandle.getFile();
-  const blobUrl  = URL.createObjectURL(imgFile);
-  const relPath  = './' + imgFile.name;
-  blobUrls.set(blobUrl, relPath);
-
-  const doc      = getDoc();
-  const img      = doc.createElement('img');
-  img.src        = blobUrl;
-  img.alt        = '';
-
-  const pos      = document.getElementById('iposSelect').value;
-  const sizeVal  = (document.getElementById('iImgSize').value || '120px').trim();
-  const zIdx     = _imgLayer === 'back' ? '-1' : '1';
-  const parent   = selectedEl.parentElement;
-
-  if (pos === 'right') {
-    img.style.cssText = `float:right;width:${sizeVal};margin:0 0 8px 12px;position:relative;z-index:${zIdx};display:block;`;
-    parent.insertBefore(img, selectedEl);
-
-  } else if (pos === 'left') {
-    img.style.cssText = `float:left;width:${sizeVal};margin:0 12px 8px 0;position:relative;z-index:${zIdx};display:block;`;
-    parent.insertBefore(img, selectedEl);
-
-  } else if (pos === 'top') {
-    img.style.cssText = `display:block;width:${sizeVal};margin:0 auto 8px;z-index:${zIdx};`;
-    parent.insertBefore(img, selectedEl);
-
-  } else if (pos === 'bottom') {
-    img.style.cssText = `display:block;width:${sizeVal};margin:8px auto 0;z-index:${zIdx};`;
-    parent.insertBefore(img, selectedEl.nextSibling);
-
-  } else if (pos === 'center') {
-    // Wrap selected element in a relative container, then overlay image
-    const wrapper = doc.createElement('div');
-    wrapper.style.cssText = 'position:relative;display:inline-block;';
-    parent.insertBefore(wrapper, selectedEl);
-    wrapper.appendChild(selectedEl);
-    img.style.cssText = `position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:${sizeVal};z-index:${zIdx};pointer-events:none;`;
-    wrapper.appendChild(img);
   }
-
-  setStatus('✓ تم إدراج الصورة');
-}
-
-/* ═══════════════════════════════════════
-   HIDDEN ELEMENTS MANAGER
-═══════════════════════════════════════ */
-function showHiddenElements() {
-  const doc = getDoc();
-  if (!doc) { setStatus('✕ لا يوجد ملف محمّل'); return; }
-
-  const hidden = [...doc.querySelectorAll('*')].filter(el =>
-    el.style.display === 'none' &&
-    !['SCRIPT','STYLE','HEAD'].includes(el.tagName)
-  );
-
-  const ov = document.createElement('div');
-  ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:999;display:flex;align-items:center;justify-content:center';
-
-  if (!hidden.length) {
-    ov.innerHTML = `<div style="background:#fff;border-radius:14px;padding:26px;min-width:260px;font-family:Tajawal,sans-serif;text-align:center">
-      <div style="font-size:16px;font-weight:700;margin-bottom:12px">العناصر المخفية</div>
-      <div style="color:#888;font-size:13px;margin-bottom:16px">لا توجد عناصر مخفية حالياً</div>
-      <button onclick="this.closest('div').parentElement.remove()" style="padding:8px 22px;border:1px solid #ccc;border-radius:8px;background:#fff;cursor:pointer;font-family:Tajawal,sans-serif;font-size:13px">إغلاق</button>
-    </div>`;
-  } else {
-    const rows = hidden.map((el, i) => {
-      const tag     = el.tagName.toLowerCase();
-      const cls     = [...el.classList].filter(c => c !== '_sel').map(c => '.'+c).join('');
-      const preview = (el.textContent || '').trim().slice(0, 35) || el.getAttribute('src') || el.getAttribute('alt') || '—';
-      return `<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #f0f0f0">
-        <span style="font-family:monospace;font-size:11px;background:#e8f3fc;color:#0e6db5;padding:2px 8px;border-radius:4px;flex-shrink:0;white-space:nowrap">${tag}${cls}</span>
-        <span style="font-size:12px;color:#555;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;direction:rtl">${preview}</span>
-        <button data-idx="${i}" onclick="window._revealEl(${i},this)" style="padding:4px 12px;border:1px solid #1a9b5a;border-radius:6px;background:#fff;color:#1a9b5a;cursor:pointer;font-family:Tajawal,sans-serif;font-size:12px;flex-shrink:0">إظهار</button>
-      </div>`;
-    }).join('');
-
-    ov.innerHTML = `<div style="background:#fff;border-radius:14px;padding:22px;min-width:320px;max-width:460px;max-height:72vh;display:flex;flex-direction:column;font-family:Tajawal,sans-serif">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
-        <span style="font-size:15px;font-weight:700">العناصر المخفية (${hidden.length})</span>
-        <button onclick="this.closest('div').parentElement.parentElement.remove()" style="border:none;background:none;cursor:pointer;font-size:20px;color:#aaa;line-height:1">✕</button>
-      </div>
-      <div style="overflow-y:auto;flex:1">${rows}</div>
-      <button onclick="window._revealAll()" style="margin-top:12px;padding:8px;border:1px solid #0e6db5;border-radius:8px;background:#e8f3fc;color:#0e6db5;cursor:pointer;font-family:Tajawal,sans-serif;font-size:13px;font-weight:700">إظهار الكل</button>
-    </div>`;
-
-    window._revealEl = (idx, btn) => {
-      const el = hidden[idx];
-      record({ el, prop: 'display', oldVal: 'none', newVal: '' });
-      el.style.display = '';
-      btn.textContent = '✓ ظهر';
-      btn.style.cssText = 'padding:4px 12px;border:1px solid #ccc;border-radius:6px;background:#fff;color:#aaa;font-family:Tajawal,sans-serif;font-size:12px;flex-shrink:0;cursor:default';
-      btn.disabled = true;
-      setStatus('✓ تم إظهار العنصر');
-    };
-
-    window._revealAll = () => {
-      hidden.forEach((el, i) => {
-        if (el.style.display === 'none') {
-          record({ el, prop: 'display', oldVal: 'none', newVal: '' });
-          el.style.display = '';
-        }
-      });
-      ov.remove();
-      setStatus('✓ تم إظهار جميع العناصر المخفية');
-    };
-  }
-
-  ov.addEventListener('click', e => { if (e.target === ov) ov.remove(); });
-  document.body.appendChild(ov);
-}
-
-function deleteEl() {
-  if (!selectedEl) return;
-  if (!confirm('حذف هذا العنصر؟')) return;
-  selectedEl.remove();
-  selectedEl = null;
-  showEmpty();
-  setStatus('✓ تم الحذف');
-}
-
-/* ═══════════════════════════════════════
-   COPY / PASTE FORMAT
-═══════════════════════════════════════ */
-function copyFormat() {
-  if (!selectedEl) return;
-  copiedFormat = selectedEl.getAttribute('style') || '';
-  document.getElementById('pasteFmtBtn').disabled = false;
-  setStatus('✓ تم نسخ التنسيق — اختر عنصراً آخر والصق');
-}
-
-function pasteFormat() {
-  if (!selectedEl || copiedFormat === null) return;
-  const old = selectedEl.getAttribute('style') || '';
-  selectedEl.setAttribute('style', copiedFormat);
-  record({ el: selectedEl, prop: '__style', oldVal: old, newVal: copiedFormat });
-  populatePanel();
-  setStatus('✓ تم لصق التنسيق');
-}
-
-/* ═══════════════════════════════════════
-   HISTORY — UNDO / REDO
-═══════════════════════════════════════ */
-function record(entry) {
-  if (histIdx < hist.length - 1) hist.splice(histIdx + 1);
-  hist.push(entry);
-  if (hist.length > MAX_HIST) hist.shift(); else histIdx++;
-  histIdx = hist.length - 1;
-  updateHistBtns();
-}
-
-function applyEntry(entry, forward) {
-  const { el, prop, oldVal, newVal } = entry;
-  const val = forward ? newVal : oldVal;
-  if (prop === '__text') { el.textContent = val; if (selectedEl === el) setV('elText', val); }
-  else if (prop === '__style') { el.setAttribute('style', val); if (selectedEl === el) { setV('cssRaw', val); populatePanel(); } }
-  else { el.style[prop] = val; if (selectedEl === el) populatePanel(); }
-}
-
-function undo() {
-  if (histIdx < 0) return;
-  applyEntry(hist[histIdx], false);
-  histIdx--;
-  updateHistBtns();
-  setStatus('↩ تراجع');
-}
-
-function redo() {
-  if (histIdx >= hist.length - 1) return;
-  histIdx++;
-  applyEntry(hist[histIdx], true);
-  updateHistBtns();
-  setStatus('↪ إعادة');
-}
-
-function updateHistBtns() {
-  document.getElementById('undoBtn').disabled = histIdx < 0;
-  document.getElementById('redoBtn').disabled = histIdx >= hist.length - 1;
-}
-
-/* ═══════════════════════════════════════
-   SAVE
-═══════════════════════════════════════ */
-async function saveFile() {
-  if (!indexHandle) return;
-  const doc = getDoc();
-  // Clean up editor artifacts before saving
-  doc.querySelectorAll('._sel').forEach(el => el.classList.remove('_sel'));
-  const ve = doc.getElementById('_ve'); if (ve) ve.remove();
-  selectedEl = null; showEmpty();
-  // Restore original relative src paths (remove blob URLs)
-  doc.querySelectorAll('img').forEach(img => {
-    const orig = blobUrls.get(img.src); if (orig) img.setAttribute('src', orig);
-  });
-  const html = '<!DOCTYPE html>\n' + doc.documentElement.outerHTML;
-  try {
-    // "Save As" dialog → always creates a new file, never overwrites original
-    const newHandle = await window.showSaveFilePicker({
-      suggestedName: (indexHandle.name || 'page').replace('.html', '-edited.html'),
-      types: [{ description: 'HTML File', accept: { 'text/html': ['.html'] } }]
-    });
-    const w = await newHandle.createWritable();
-    await w.write(html);
-    await w.close();
-    indexHandle = newHandle; // track new file as current
-    setStatus('✓ حُفظ كملف جديد: ' + newHandle.name + ' — ' + new Date().toLocaleTimeString('ar'));
-    setTimeout(setupIframe, 80);
-  } catch(e) {
-    if (e.name !== 'AbortError') setStatus('✕ فشل الحفظ: ' + e.message);
-    else setTimeout(setupIframe, 80); // re-add editor styles after cancel
-  }
-}
-
-/* ═══════════════════════════════════════
-   ZOOM
-═══════════════════════════════════════ */
-function setZoom(val) {
-  const iframe = document.getElementById('preview');
-  iframe.style.transform = `scale(${val})`;
-  iframe.style.transformOrigin = 'top right';
-  iframe.style.width = (100 / val) + '%';
-  iframe.style.height = (100 / val) + '%';
-}
-
-/* ═══════════════════════════════════════
-   KEYBOARD SHORTCUTS
-═══════════════════════════════════════ */
-document.addEventListener('keydown', e => {
-  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
-  if ((e.ctrlKey || e.metaKey) && e.key === 'z') { e.preventDefault(); undo(); }
-  if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.shiftKey && e.key === 'z'))) { e.preventDefault(); redo(); }
-  if (e.key === 'Escape') deselectEl();
-  if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); saveFile(); }
-});
-
-/* ═══════════════════════════════════════
-   HELPERS
-═══════════════════════════════════════ */
-function rgbToHex(rgb) {
-  const m = (rgb || '').match(/\d+/g);
-  if (!m || m.length < 3) return '#000000';
-  return '#' + m.slice(0,3).map(n => parseInt(n).toString(16).padStart(2,'0')).join('');
-}
-function setV(id, val) {
-  const el = document.getElementById(id);
-  if (el) el.value = val;
-}
-function setStatus(msg) { document.getElementById('status').textContent = msg; }
 </script>
+
 </body>
 </html>
