@@ -505,7 +505,9 @@ body.lang-en .item-sub{text-align:left;font-size:11px}
     min-width:0;
     width:auto;
     flex:1 1 0;
-    overflow:hidden;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+    max-height:100%;
     align-items:flex-start;
   }
 
@@ -518,8 +520,8 @@ body.lang-en .item-sub{text-align:left;font-size:11px}
     font-size:clamp(18px,4vh,24px);
     margin-bottom:0;opacity:.7;
   }
-  .sec:not(.is-expanded) .item-main{font-size:clamp(18px,4vh,24px)}
-  .sec:not(.is-expanded) .item-sub{font-size:clamp(14px,3.2vh,18px)}
+  .sec:not(.is-expanded) .item-main{font-size:clamp(11px,2.8vh,15px)}
+  .sec:not(.is-expanded) .item-sub{font-size:clamp(9px,2vh,12px)}
   .sec:not(.is-expanded) .items{gap:4px}
   .sec:not(.is-expanded) .item{gap:7px}
   .sec:not(.is-expanded) .dot{width:4px;height:4px;margin-top:5px}
