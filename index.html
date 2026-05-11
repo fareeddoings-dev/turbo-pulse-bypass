@@ -481,14 +481,16 @@ body.lang-en .item-sub{text-align:left;font-size:11px}
     gap:3px;
     flex-shrink:0;
     padding:0;
+    max-width:45%;
   }
   .items{
     direction:rtl;
     gap:4px;
-    min-width:220px;
+    min-width:0;
     width:auto;
+    flex:1 1 0;
+    overflow:hidden;
     align-items:flex-start;
-    flex-shrink:0;
   }
 
   .sec:not(.is-expanded) .sec-title-en{
@@ -509,7 +511,7 @@ body.lang-en .item-sub{text-align:left;font-size:11px}
   .bar{display:none}
 
   .sec-main::after{display:none}
-  .sec-inner{padding:16px 16px}
+  .sec-inner{padding:16px;overflow-y:auto;-webkit-overflow-scrolling:touch}
   .back-btn{position:static;margin-top:auto;transform:none}
 }
 </style>
@@ -634,9 +636,7 @@ body.lang-en .item-sub{text-align:left;font-size:11px}
   window.addEventListener('resize',()=>{
     clearTimeout(orientTimer);
     orientTimer=setTimeout(()=>{
-      // يعيد تثبيت الـ viewport بعد تغيير الاتجاه
-      document.documentElement.style.height=window.innerHeight+'px';
-      document.body.style.height=window.innerHeight+'px';
+      void document.body.offsetHeight; // force reflow فقط
     },100);
   });
 
