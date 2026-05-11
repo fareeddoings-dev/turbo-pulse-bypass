@@ -338,12 +338,10 @@ body.lang-en .sec-title-ar{
 .item-main{font-size:15px;font-weight:700;color:var(--text-main);line-height:1.5}
 .item-sub{ font-size:11.5px;color:var(--text-dim);font-family:var(--font-en);letter-spacing:.2px;margin-top:2px;font-weight:700}
 
-body.lang-en .item{
-  direction:ltr;              /* يقلب الـ flex: النقطة يسار، النص يمين */
-}
+body.lang-en .item{direction:ltr}
 body.lang-en .item-main{font-family:var(--font-en);font-size:14px}
 body.lang-en .item-text-wrap{text-align:left}
-body.lang-en .item-sub{text-align:left;font-size:11px}
+body.lang-en .item-sub{font-size:11px}
 
 /* ─── ANIMATIONS ─────────────────────────────────── */
 @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
@@ -401,7 +399,6 @@ body.lang-en .item-sub{text-align:left;font-size:11px}
   .sec-text{
     display:flex;
     flex-direction:row;
-    direction:rtl;
     align-items:stretch;
     flex:1;
     min-width:0;
@@ -409,9 +406,6 @@ body.lang-en .item-sub{text-align:left;font-size:11px}
     justify-content:space-between;
     gap:16px;
   }
-  body.lang-en .sec-text{direction:ltr}
-  body.lang-en .title-row{order:1;align-items:flex-end;text-align:left}
-  body.lang-en .items{order:0;align-items:flex-start}
 
   .bar{display:none}
 
@@ -423,6 +417,7 @@ body.lang-en .item-sub{text-align:left;font-size:11px}
     gap:3px;
     flex-shrink:0;
     padding:0;
+    justify-content:center;
   }
   .sec:not(.is-expanded) .sec-title-en{
     font-size:clamp(40px,10vw,64px);
@@ -443,11 +438,17 @@ body.lang-en .item-sub{text-align:left;font-size:11px}
     align-items:flex-end;
     width:auto;
     max-width:none;
+    justify-content:center;
   }
   .sec:not(.is-expanded) .item-main{font-size:clamp(13px,3.2vw,17px)}
   .sec:not(.is-expanded) .item-sub{font-size:clamp(10px,2.4vw,13px)}
-  .sec:not(.is-expanded) .item{gap:7px;direction:ltr}
+  .sec:not(.is-expanded) .item{gap:7px}
   .sec:not(.is-expanded) .dot{width:4px;height:4px;margin-top:6px}
+
+  /* English portrait: عنوان يسار، وصف يمين */
+  body.lang-en .sec-text{direction:ltr}
+  body.lang-en .title-row{align-items:flex-start;text-align:left}
+  body.lang-en .items{align-items:flex-start}
 
   .sec-main::after{display:none}
   .page.expanded-cool .cool .sec-main:hover,
@@ -522,15 +523,15 @@ body.lang-en .item-sub{text-align:left;font-size:11px}
   .title-row{
     display:flex;
     flex-direction:column;
-    align-items:center;
-    text-align:center;
+    align-items:flex-start;
+    text-align:left;
     gap:3px;
     flex-shrink:0;
     padding:0;
     max-width:45%;
+    order:2;
   }
   .items{
-    direction:rtl;
     gap:4px;
     min-width:0;
     width:auto;
@@ -539,32 +540,32 @@ body.lang-en .item-sub{text-align:left;font-size:11px}
     -webkit-overflow-scrolling:touch;
     max-height:100%;
     align-items:flex-start;
+    order:1;
   }
 
   .sec:not(.is-expanded) .sec-title-en{
-    font-size:clamp(30px,7vh,42px);
+    font-size:clamp(28px,6vh,40px);
     opacity:1;
     margin-bottom:0;
   }
   .sec:not(.is-expanded) .sec-title-ar{
-    font-size:clamp(18px,4vh,24px);
+    font-size:clamp(17px,3.8vh,24px);
     margin-bottom:0;opacity:.7;
   }
-  .sec:not(.is-expanded) .item-main{font-size:clamp(11px,2.8vh,15px)}
-  .sec:not(.is-expanded) .item-sub{font-size:clamp(9px,2vh,12px)}
+  .sec:not(.is-expanded) .item-main{font-size:clamp(14px,3.5vh,19px)}
+  .sec:not(.is-expanded) .item-sub{font-size:clamp(11px,2.8vh,15px)}
   .sec:not(.is-expanded) .items{gap:4px}
   .sec:not(.is-expanded) .item{gap:7px}
   .sec:not(.is-expanded) .dot{width:4px;height:4px;margin-top:5px}
 
   .bar{display:none}
 
+  /* Landscape Arabic: عنوان يمين بمحاذاة يمنى */
+  body:not(.lang-en) .title-row{text-align:right;align-items:flex-end}
+
   .sec-main::after{display:none}
   .sec-inner{padding:16px;overflow-y:auto;-webkit-overflow-scrolling:touch}
   .back-btn{position:static;margin-top:auto;transform:none}
-  .cool.is-closing .sec-main{transform:translateY( 40px)}
-  .veh.is-closing  .sec-main{transform:translateY(-40px)}
-  .cool.is-closing .sec-main{transform:translateY( 40px)}
-  .veh.is-closing  .sec-main{transform:translateY(-40px)}
 }
 /* PORTRAIT يحذف من هنا — يستخدم الفليكس من الميديا كويري الأولى */
 </style>
