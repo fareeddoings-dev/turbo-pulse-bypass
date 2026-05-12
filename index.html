@@ -587,6 +587,8 @@ body.lang-en .item-sub{font-size:11px}
 
   .bar{display:none}
 
+.sec-icon{ width:clamp(50px,18vh,80px) !important; height:auto !important; }
+
   /* Landscape: العنوان في المنتصف لعربي وإنجليزي */
   body:not(.lang-en) .title-row{text-align:center;align-items:center}
   body:not(.lang-en) .items{direction:rtl;align-items:flex-end}
@@ -772,21 +774,24 @@ function equalizeItemsHeight(){
   }
 function equalizeItemsWidth(){
   const lists = document.querySelectorAll('.items');
-  lists.forEach(l => l.style.width = '');
+  lists.forEach(l => { l.style.width = ''; l.style.maxWidth = ''; });
   const isLandscape = window.innerWidth <= 860 && window.innerWidth > window.innerHeight;
   if(!isLandscape) return;
-  setTimeout(()=>{
+  // قِس العرض الطبيعي (fit-content) بدون قيود
+  lists.forEach(l => { l.style.width = 'fit-content'; l.style.maxWidth = 'none'; });
+  requestAnimationFrame(()=>{
     const maxW = Math.max(...[...lists].map(l => l.getBoundingClientRect().width));
-    lists.forEach(l => l.style.width = maxW + 'px');
-  }, 60);
+    lists.forEach(l => { l.style.width = maxW + 'px'; l.style.maxWidth = 'none'; });
+  });
 }
 
-  window.addEventListener('resize',()=>{ clearTimeout(_iconTimer); _iconTimer=setTimeout(()=>{ syncIconWidth(); equalizeItemsHeight(); },80); });
-  document.fonts.ready.then(()=>{ syncIconWidth(); equalizeItemsHeight(); });
-  setTimeout(()=>{ syncIconWidth(); equalizeItemsHeight(); },200);
+  window.addEventListener('resize',()=>{ clearTimeout(_iconTimer); _iconTimer=setTimeout(()=>{ syncIconWidth(); equalizeItemsHeight(); equalizeItemsWidth(); },80); });
+  document.fonts.ready.then(()=>{ syncIconWidth(); equalizeItemsHeight(); equalizeItemsWidth(); });
+  setTimeout(()=>{ syncIconWidth(); equalizeItemsHeight(); equalizeItemsWidth(); },200);
 
   function syncIconWidth(){
     document.querySelectorAll('.sec-title-en').forEach(title=>{
+      if(window.innerWidth <= 860 && window.innerWidth > window.innerHeight) return;
       const row = title.closest('.title-row');
       if(!row) return;
       const icon = row.querySelector('.sec-icon');
