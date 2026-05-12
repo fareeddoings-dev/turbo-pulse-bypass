@@ -36,27 +36,26 @@ body{font-family:var(--ar);background:#f5f5f5;color:var(--text-main);-webkit-fon
 .track{
   position:absolute;left:0;top:0;
   display:flex;flex-direction:row;
-  width:300vw;height:100%;
+  width:300vw;height:100vh;
   direction:ltr;
-  will-change:transform;
-  transition:transform .55s var(--ease);
+  transition:transform .6s cubic-bezier(.4,0,.2,1);
 }
 .track.at-main{transform:translateX(-100vw)}
 .track.at-cool{transform:translateX(-200vw)}
 .track.at-veh {transform:translateX(0)}
 
-.panel{width:100vw;height:100%;overflow-y:auto;flex-shrink:0;-webkit-overflow-scrolling:touch}
+.panel{width:100vw;height:100vh;overflow-y:auto;flex-shrink:0;-webkit-overflow-scrolling:touch}
 .panel-main{overflow:hidden;background:#fff}
 .panel-veh{background:#fff}
 .panel-cool{background:#fff}
 
 /* Portrait: vertical track */
 @media(max-width:860px) and (orientation:portrait){
-  .track{flex-direction:column;width:100%;height:300vh;height:300dvh}
-  .track.at-main{transform:translateY(-100vh);transform:translateY(-100dvh)}
+  .track{flex-direction:column;width:100vw;height:300vh}
+  .track.at-main{transform:translateY(-100vh)}
   .track.at-cool{transform:translateY(0)}
-  .track.at-veh {transform:translateY(-200vh);transform:translateY(-200dvh)}
-  .panel{width:100%;height:100vh;height:100dvh}
+  .track.at-veh {transform:translateY(-200vh)}
+  .panel{width:100vw;height:100vh}
   .panel-veh{order:3}
   .panel-main{order:2}
   .panel-cool{order:1}
@@ -84,9 +83,6 @@ body{font-family:var(--ar);background:#f5f5f5;color:var(--text-main);-webkit-fon
 .sec{
   width:50%;flex:0 0 50%;
   position:relative;overflow:hidden;display:flex;cursor:pointer;
-  transform:translateZ(0);          /* ★ own compositing layer → fixes backdrop-filter blur artifact */
-  -webkit-transform:translateZ(0);
-  transition:width .48s var(--ease),height .48s var(--ease),flex-basis .48s var(--ease);
 }
 .sec-arrow{
   position:absolute;z-index:5;font-size:28px;font-weight:300;
@@ -235,20 +231,23 @@ body.lang-en .back-btn{font-family:var(--en);font-size:12px;letter-spacing:.4px}
 .back-arrow{font-size:15px;line-height:1}
 
 /* ── Language toggle fade ─────────────────────── */
-.sec-title-en,.sec-title-ar,.item-main,.item-sub,
-.card-ar,.hero-title,.section-title,
-.header-div-ar,[data-ar]{
-  transition:opacity .18s ease;
+.main-page,.sec,.sec-main,.sec-text,.sec-logo,
+.sec-title-en,.sec-title-ar,.items,.item-main,.item-sub,.item-text-wrap{
+  transition:
+    width .5s var(--ease), height .5s var(--ease),
+    padding .5s var(--ease), gap .5s var(--ease),
+    font-size .5s var(--ease), border-radius .5s var(--ease),
+    opacity .5s var(--ease), transform .5s var(--ease),
+    margin .5s var(--ease);
 }
+
+[data-ar]{transition:opacity .18s ease}
+body.lang-fading [data-ar],
 body.lang-fading .sec-title-en,
-body.lang-fading .sec-title-ar,
-body.lang-fading .item-main,
-body.lang-fading .item-sub,
 body.lang-fading .card-ar,
 body.lang-fading .hero-title,
 body.lang-fading .section-title,
-body.lang-fading .header-div-ar,
-body.lang-fading [data-ar]{opacity:0}
+body.lang-fading .header-div-ar{opacity:0}
 body.is-orienting .sec-title-en,
 body.is-orienting .sec-title-ar,
 body.is-orienting .item-main,
@@ -815,7 +814,6 @@ body.lang-en .footer-row a,body.lang-en .footer-row span{font-family:var(--en);f
 <script>
 var isAr = true;
 var rt;
-var lastOrient = window.innerWidth > window.innerHeight ? 'land' : 'port';
 
 function go(name) {
   var track = document.getElementById('track');
@@ -862,53 +860,10 @@ function syncIconWidths() {
       → CSS transitions animate from old sizes to new sizes
 ───────────────────────────────────────────────────────── */
 window.addEventListener('resize', function(){
-  var orient = window.innerWidth > window.innerHeight ? 'land' : 'port';
-
-  if (orient !== lastOrient) {
-    /* ── Orientation changed ── */
-    lastOrient = orient;
-    document.body.classList.add('is-orienting');
-
-    var secs  = document.querySelectorAll('.panel-main .sec');
-    var track = document.getElementById('track');
-
-    // Snapshot
-    var snaps = Array.from(secs).map(function(s){
-      var r = s.getBoundingClientRect();
-      return { w: r.width, h: r.height };
-    });
-
-    // Freeze sec sizes + pause track slide transition
-    track.style.transition = 'none';
-    secs.forEach(function(s, i){
-      s.style.transition = 'none';
-      s.style.width  = snaps[i].w + 'px';
-      s.style.height = snaps[i].h + 'px';
-      s.style.flex   = '0 0 auto';
-    });
-
-    // Wait 2 frames (media query applies) then animate
-    requestAnimationFrame(function(){
-      requestAnimationFrame(function(){
-        track.style.transition = '';
-        secs.forEach(function(s){
-          s.style.transition = '';
-          s.style.width  = '';
-          s.style.height = '';
-          s.style.flex   = '';
-        });
-        syncIconWidths();
-        setTimeout(function(){ document.body.classList.remove('is-orienting'); }, 620);
-      });
-    });
-
-  } else {
-    /* ── Regular resize (keyboard, browser chrome) ── */
-    var track = document.getElementById('track');
-    track.style.transition = 'none';
-    clearTimeout(rt);
-    rt = setTimeout(function(){ track.style.transition = ''; syncIconWidths(); }, 160);
-  }
+  var t = document.getElementById('track');
+  t.style.transition = 'none';
+  clearTimeout(rt);
+  rt = setTimeout(function(){ t.style.transition = ''; syncIconWidths(); }, 120);
 });
 
 if (document.fonts && document.fonts.ready) {
