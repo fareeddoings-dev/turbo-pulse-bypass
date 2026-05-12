@@ -319,6 +319,7 @@ body.lang-en .sec-title-ar{
 }
 
 .title-row{display:contents} /* desktop: يختفي الـ wrapper ويبقى layout عمودي */
+.land-left{display:contents} /* transparent outside landscape */
 .bar{width:36px;height:3px;border-radius:2px;margin-bottom:24px;flex-shrink:0}
 .cool .bar{background:var(--cool-accent)}
 .veh  .bar{background:var(--veh-accent)}
@@ -514,12 +515,22 @@ body.lang-en .item-sub{font-size:11px}
   .sec-text{
     display:flex;
     flex-direction:row;
-    align-items:flex-start;
+    align-items:stretch;
     flex:1;
     min-width:0;
-    justify-content:space-between;
+    gap:16px;
   }
 
+  .land-left{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+    flex-shrink:0;
+    width:auto;
+    order:2;
+  }
   .title-row{
     display:flex;
     flex-direction:column;
@@ -529,7 +540,6 @@ body.lang-en .item-sub{font-size:11px}
     flex-shrink:0;
     padding:0;
     max-width:35%;
-    order:2;
   }
   .items{
     gap:2px;
@@ -578,11 +588,13 @@ body.lang-en .item-sub{font-size:11px}
   <div class="sec cool" id="secCool" onclick="expandSection(event,'cool')">
 
     <div class="sec-main">
-      <img src="./volga_havc.png" alt="VOLGA HVAC" class="sec-logo">
       <div class="sec-text">
+      <div class="land-left">
+      <img src="./volga_havc.png" alt="VOLGA HVAC" class="sec-logo">
       <div class="title-row">
       <div class="sec-title-en">COOLING</div>
       <div class="sec-title-ar" data-ar="حلول التبريد الصناعي" data-en="Industrial Cooling Solutions">حلول التبريد الصناعي</div>
+      </div>
       </div>
       <div class="bar"></div>
       <ul class="items">
@@ -633,11 +645,13 @@ body.lang-en .item-sub{font-size:11px}
   <div class="sec veh" id="secVeh" onclick="expandSection(event,'veh')">
 
     <div class="sec-main">
-      <img src="./volga_svs.png" alt="VOLGA Vehicles" class="sec-logo">
       <div class="sec-text">
+      <div class="land-left">
+      <img src="./volga_svs.png" alt="VOLGA Vehicles" class="sec-logo">
       <div class="title-row">
       <div class="sec-title-en">VEHICLES</div>
       <div class="sec-title-ar" data-ar="حلول المركبات" data-en="Vehicle Solutions">حلول المركبات</div>
+      </div>
       </div>
       <div class="bar"></div>
       <ul class="items">
