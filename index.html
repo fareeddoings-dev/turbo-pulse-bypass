@@ -28,11 +28,11 @@
   --cool-bg:url('./volga_havc_bg.png');
   --veh-bg:url('./volga_svs_bg.png');
   /* شفافية الخلفية (0=شفاف, 1=كامل) */
-  --cool-bg-opacity:0.4;
-  --veh-bg-opacity:0.4;
+  --cool-bg-opacity:0.2;
+  --veh-bg-opacity:0.2;
   /* تمويه الخلفية (0=واضح, 10px=ضبابي) */
-  --cool-bg-blur:5px;
-  --veh-bg-blur:5px;
+  --cool-bg-blur:0px;
+  --veh-bg-blur:0px;
 }
 
 html,body{height:100%;overflow:hidden}
@@ -209,8 +209,8 @@ body{font-family:var(--font-ar);background:#fff;color:var(--text-main);-webkit-f
   transition:opacity .3s ease, background .35s ease, transform .45s cubic-bezier(.4,0,.2,1);
 }
 
-.cool .sec-main:hover{background:rgba(14,109,181,.06)}
-.veh  .sec-main:hover{background:rgba(184,98,10,.06)}
+.cool .sec-main:hover{background:rgba(14,109,181,.11)}
+.veh  .sec-main:hover{background:rgba(184,98,10,.11)}
 
 /* لا هوفر عند الـ expand */
 .page.expanded-cool .cool .sec-main:hover,
@@ -345,7 +345,7 @@ body.lang-en .sec-title-ar{
 
 @media(max-width:860px){
   .items{
-    padding:14px 16px;
+    padding:10px 14px;
     border-radius:14px;
     backdrop-filter:blur(10px) saturate(150%);
     -webkit-backdrop-filter:blur(10px) saturate(150%);
@@ -418,10 +418,11 @@ body.lang-en .item-sub{font-size:11px}
     padding:14px 20px;
     min-width:0;
     height:100%;
-    overflow:hidden;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
   }
 
-  .sec-logo{height:60px;width:auto;max-width:100px;margin-bottom:4px;flex-shrink:0}
+  .sec-logo{height:50px;width:auto;max-width:90px;margin-bottom:4px;flex-shrink:0}
 
   .sec-text{
     display:flex;
@@ -467,9 +468,9 @@ body.lang-en .item-sub{font-size:11px}
     max-width:none;
     justify-content:center;
   }
-  .sec:not(.is-expanded) .item-main{font-size:clamp(15px,3.8vw,19px)}
-  .sec:not(.is-expanded) .item-sub{font-size:clamp(12px,3vw,15px)}
-  .sec:not(.is-expanded) .item{gap:7px}
+  .se.sec:not(.is-expanded) .item-main{font-size:clamp(13px,3.2vw,16px)}
+  .sec:not(.is-expanded) .item-sub{font-size:clamp(11px,2.6vw,13px)}
+  .sec:not(.is-expanded) .items{gap:4px;
   .sec:not(.is-expanded) .dot{width:4px;height:4px;margin-top:6px}
 
   /* English portrait: عنوان يسار، وصف يمين */
@@ -561,8 +562,8 @@ body.lang-en .item-sub{font-size:11px}
   .items{
     gap:2px;
     min-width:0;
-    width:auto;
-    flex:1 1 0;
+    width:fit-content;
+    flex:0 0 auto;
     align-items:flex-start;
     order:1;
     align-self:stretch;
@@ -758,7 +759,7 @@ body.lang-en .item-sub{font-size:11px}
     }, 150);
 
     // أعِد تفعيل الـ click بعد انتهاء الـ collapse
-    setTimeout(() => { isExpanded = false; }, 700);
+setTimeout(() => { isExpanded = false; }, 700);
   }
 
 function equalizeItemsHeight(){
@@ -769,9 +770,21 @@ function equalizeItemsHeight(){
       lists.forEach(l=>l.style.minHeight = maxH+'px');
     }
   }
-  window.addEventListener('resize',()=>{ clearTimeout(_iconTimer); _iconTimer=setTimeout(()=>{ syncIconWidth(); equalizeItemsHeight(); },80); });
-  document.fonts.ready.then(()=>{ syncIconWidth(); equalizeItemsHeight(); });
-  setTimeout(()=>{ syncIconWidth(); equalizeItemsHeight(); },200);
+function equalizeItemsWidth(){
+  const lists = document.querySelectorAll('.items');
+  lists.forEach(l => l.style.width = '');
+  const isLandscape = window.innerWidth <= 860 && window.innerWidth > window.innerHeight;
+  if(!isLandscape) return;
+  lists.forEach(l => l.style.width = 'fit-content');
+  requestAnimationFrame(()=>{
+    const maxW = Math.max(...[...lists].map(l => l.scrollWidth));
+    lists.forEach(l => l.style.width = maxW + 'px');
+  });
+}
+
+  window.addEventListener('resize',()=>{ clearTimeout(_iconTimer); _iconTimer=setTimeout(()=>{ syncIconWidth(); equalizeItemsHeight(); equalizeItemsWidth(); },80); });
+  document.fonts.ready.then(()=>{ syncIconWidth(); equalizeItemsHeight(); equalizeItemsWidth(); });
+  setTimeout(()=>{ syncIconWidth(); equalizeItemsHeight(); equalizeItemsWidth(); },200);
 
   function syncIconWidth(){
     document.querySelectorAll('.sec-title-en').forEach(title=>{
