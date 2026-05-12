@@ -495,26 +495,26 @@ body.lang-en .item-sub{font-size:11px}
 /* ─── LANDSCAPE MOBILE ──────────────────────────── */
 /* 3 أعمدة: شعار يسار | عنوان وسَط | وصف يمين        */
 @media(max-width:860px) and (orientation:landscape){
-  .sec{overflow:hidden}
+  .sec{overflow:hidden;padding:6px 0}
 
 .sec-main{
-    direction:ltr; /* شعار يسار، وصف يمين */
+    direction:ltr;
     flex-direction:row;
     align-items:center;
-    justify-content:center;
-    padding:18px 20px;
-    gap:16px;
+    justify-content:flex-start;
+    padding:28px 20px;
+    gap:10px;
     height:100%;
     overflow-y:auto;
     -webkit-overflow-scrolling:touch;
   }
 
-  .sec-logo{height:55px;width:auto;max-width:100px;flex-shrink:0}
+  .sec-logo{height:36px;width:auto;max-width:80px;flex-shrink:0}
 
   .sec-text{
     display:flex;
     flex-direction:row;
-    align-items:center;
+    align-items:flex-start;
     flex:1;
     min-width:0;
     justify-content:space-between;
@@ -525,38 +525,37 @@ body.lang-en .item-sub{font-size:11px}
     flex-direction:column;
     align-items:center;
     text-align:center;
-    gap:3px;
+    gap:2px;
     flex-shrink:0;
     padding:0;
-    max-width:45%;
+    max-width:35%;
     order:2;
   }
   .items{
-    gap:4px;
+    gap:2px;
     min-width:0;
     width:auto;
     flex:1 1 0;
-    overflow-y:auto;
-    -webkit-overflow-scrolling:touch;
-    max-height:100%;
     align-items:flex-start;
     order:1;
+    align-self:stretch;
+    justify-content:center;
   }
 
   .sec:not(.is-expanded) .sec-title-en{
-    font-size:clamp(28px,6vh,40px);
+    font-size:clamp(18px,4.5vh,28px);
     opacity:1;
     margin-bottom:0;
   }
   .sec:not(.is-expanded) .sec-title-ar{
-    font-size:clamp(17px,3.8vh,24px);
+    font-size:clamp(12px,2.8vh,17px);
     margin-bottom:0;opacity:.7;
   }
-  .sec:not(.is-expanded) .item-main{font-size:clamp(14px,3.5vh,19px)}
-  .sec:not(.is-expanded) .item-sub{font-size:clamp(13px,3.2vh,16px)}
-  .sec:not(.is-expanded) .items{gap:4px}
-  .sec:not(.is-expanded) .item{gap:7px}
-  .sec:not(.is-expanded) .dot{width:4px;height:4px;margin-top:5px}
+  .sec:not(.is-expanded) .item-main{font-size:clamp(11px,2.8vh,15px)}
+  .sec:not(.is-expanded) .item-sub{font-size:clamp(10px,2.5vh,13px)}
+  .sec:not(.is-expanded) .items{gap:2px}
+  .sec:not(.is-expanded) .item{gap:5px}
+  .sec:not(.is-expanded) .dot{width:3px;height:3px;margin-top:4px}
 
   .bar{display:none}
 
