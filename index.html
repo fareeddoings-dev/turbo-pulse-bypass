@@ -84,6 +84,7 @@ body{font-family:var(--ar);background:#f5f5f5;color:var(--text-main);-webkit-fon
 .sec{
   width:50%;flex:0 0 50%;
   position:relative;overflow:hidden;display:flex;cursor:pointer;
+  transition:width .5s var(--ease),height .5s var(--ease),flex-basis .5s var(--ease);
 }
 .sec-arrow{
   position:absolute;z-index:5;font-size:28px;font-weight:300;
@@ -140,7 +141,7 @@ body{font-family:var(--ar);background:#f5f5f5;color:var(--text-main);-webkit-fon
   text-align:center;padding:56px;
   position:relative;z-index:2;
   background:rgba(255,255,255,.15);
-  transition:background .3s ease;
+  transition:background .3s ease, padding .45s var(--ease);
 }
 .cool .sec-main:hover{background:rgba(14,109,181,.11)}
 .veh  .sec-main:hover{background:rgba(184,98,10,.11)}
@@ -161,12 +162,14 @@ body{font-family:var(--ar);background:#f5f5f5;color:var(--text-main);-webkit-fon
 .sec-title-en{
   font-family:var(--en);font-size:72px;font-weight:800;
   line-height:1;letter-spacing:-2px;text-transform:uppercase;margin-bottom:2px;
+  transition:font-size .45s var(--ease);
 }
 .cool .sec-title-en{color:var(--cool)}
 .veh  .sec-title-en{color:var(--veh)}
 .sec-title-ar{
   font-family:var(--ar);font-size:24px;font-weight:700;
   color:var(--dim);line-height:1.2;margin-bottom:16px;
+  transition:font-size .45s var(--ease);
 }
 body.lang-en .sec-title-ar{font-family:var(--en);font-size:20px}
 .bar{width:36px;height:3px;border-radius:2px;margin-bottom:24px;flex-shrink:0}
@@ -326,16 +329,20 @@ body.lang-en .footer-row a,body.lang-en .footer-row span{font-family:var(--en);f
   .panel-main{overflow:hidden}
   .main-page{
     flex-direction:column;
-    height:100%;
+    height:100vh;
     overflow:hidden;
   }
+  /* Collapse line but keep langBtn floating at boundary */
   .divider{
-    width:100%;height:1px;flex-shrink:0;
+    width:100%;height:0;flex-shrink:0;
+    position:relative;z-index:200;overflow:visible;
+    background:transparent;
   }
-  /* ★ THE KEY FIX: exact 50%, no shrink/grow, hidden overflow */
+  /* ★ Explicit 50vh — most reliable across all mobile browsers */
   .sec{
     width:100%!important;
-    flex:0 0 calc(50% - 0.5px)!important;
+    height:50vh!important;
+    flex:0 0 50vh!important;
     min-height:0;
     overflow:hidden!important;
   }
@@ -409,11 +416,22 @@ body.lang-en .footer-row a,body.lang-en .footer-row span{font-family:var(--en);f
     overflow:hidden!important;
   }
   .sec-main{
-    direction:ltr;flex-direction:row;
+    flex-direction:row;
     align-items:center;justify-content:flex-start;
     padding:36px 4px 8px;gap:6px;
     height:100%;overflow-y:auto;
     -webkit-overflow-scrolling:touch;
+    direction:ltr; /* EN default: items left, title right */
+  }
+  /* Arabic RTL landscape: title RIGHT (order:1), items LEFT (order:2) */
+  body:not(.lang-en) .sec-main{direction:rtl}
+  body:not(.lang-en) .title-row{
+    order:1; /* rightmost in RTL flow = RIGHT side */
+    text-align:center;align-items:center;
+  }
+  body:not(.lang-en) .items{
+    order:2; /* leftmost in RTL flow = LEFT side */
+    direction:rtl;align-items:flex-start;
   }
   .sec-logo{position:absolute;top:8px;left:50%;transform:translateX(-50%);height:26px;max-width:82px;z-index:3}
   .sec-text{display:flex;flex-direction:row;align-items:center;flex:1;min-width:0;justify-content:space-between;gap:8px}
@@ -432,8 +450,8 @@ body.lang-en .footer-row a,body.lang-en .footer-row span{font-family:var(--en);f
   .item-main{font-size:clamp(12px,2.8vh,16px)}
   .item-sub{font-size:clamp(10px,2.4vh,13px)}
   .sec-main::after{display:none}
-  body:not(.lang-en) .items{direction:rtl;align-items:flex-end}
-  body:not(.lang-en) .title-row{text-align:center;align-items:center}
+  body.lang-en .items{order:1;align-items:flex-start}
+  body.lang-en .title-row{order:2}
 
   /* Sub-pages */
   .hero{height:120px}
@@ -802,11 +820,53 @@ function syncIconWidths() {
   });
 }
 
+// Suppress track slide transition during resize (not orientation change)
 window.addEventListener('resize', function() {
   var t = document.getElementById('track');
   t.style.transition = 'none';
   clearTimeout(rt);
-  rt = setTimeout(function(){ t.style.transition = ''; syncIconWidths(); }, 150);
+  rt = setTimeout(function(){ t.style.transition = ''; }, 150);
+});
+
+/* ── Smooth orientation transition ───────────────────────────
+   When device rotates, flex-direction changes instantly (not
+   transitionable). Strategy: snapshot current sizes → apply
+   new layout → animate FROM snapshot TO new sizes via FLIP.
+──────────────────────────────────────────────────────────── */
+var lastOrient = window.innerWidth > window.innerHeight ? 'land' : 'port';
+
+window.addEventListener('resize', function() {
+  var orient = window.innerWidth > window.innerHeight ? 'land' : 'port';
+  if (orient === lastOrient) return;
+  lastOrient = orient;
+
+  var secs = document.querySelectorAll('.sec');
+  var mainPage = document.querySelector('.main-page');
+
+  // 1. Record current rects (FIRST)
+  var rects = Array.from(secs).map(function(s){ return s.getBoundingClientRect(); });
+
+  // 2. Freeze sizes so layout doesn't jump yet
+  secs.forEach(function(s, i){
+    s.style.transition = 'none';
+    s.style.width  = rects[i].width  + 'px';
+    s.style.height = rects[i].height + 'px';
+    s.style.flex   = '0 0 auto';
+  });
+
+  // 3. Let browser apply new media query (one frame)
+  requestAnimationFrame(function(){
+    requestAnimationFrame(function(){
+      // 4. Release fixed sizes — CSS takes over → transition fires
+      secs.forEach(function(s){
+        s.style.transition = '';
+        s.style.width  = '';
+        s.style.height = '';
+        s.style.flex   = '';
+      });
+      syncIconWidths();
+    });
+  });
 });
 
 if (document.fonts && document.fonts.ready) {
