@@ -470,7 +470,7 @@ body.lang-en .item-sub{font-size:11px}
   }
   .se.sec:not(.is-expanded) .item-main{font-size:clamp(13px,3.2vw,16px)}
   .sec:not(.is-expanded) .item-sub{font-size:clamp(11px,2.6vw,13px)}
-  .sec:not(.is-expanded) .items{gap:4px;
+  .sec:not(.is-expanded) .items{gap:4px;}
   .sec:not(.is-expanded) .dot{width:4px;height:4px;margin-top:6px}
 
   /* English portrait: عنوان يسار، وصف يمين */
@@ -521,8 +521,53 @@ body.lang-en .item-sub{font-size:11px}
 }
 
 /* ─── LANDSCAPE MOBILE ──────────────────────────── */
-/* 3 أعمدة: شعار يسار | عنوان وسَط | وصف يمين        */
+/* قسمان: يمين ويسار (مثل Desktop) */
 @media(max-width:860px) and (orientation:landscape){
+
+  /* ─ Layout: Row مثل Desktop ─ */
+  .page{flex-direction:row;height:100dvh}
+
+  .divider{
+    width:1px;height:100%;
+    transition:width var(--dur) var(--ease), opacity calc(var(--dur)*0.5) ease;
+  }
+  .page.expanded-cool .divider,
+  .page.expanded-veh  .divider{width:0;height:100%;opacity:0}
+
+  .sec{
+    width:50% !important;
+    max-width:50% !important;
+    height:100dvh !important;
+    max-height:100dvh !important;
+    overflow:hidden;
+    padding:0;
+    transition:max-width var(--dur) var(--ease), width var(--dur) var(--ease) !important;
+  }
+
+  /* Expand: width-based مثل Desktop */
+  .page.expanded-cool .cool{max-width:100% !important;width:100% !important}
+  .page.expanded-cool .veh {max-width:0    !important;width:0    !important}
+  .page.expanded-veh  .veh {max-width:100% !important;width:100% !important}
+  .page.expanded-veh  .cool{max-width:0    !important;width:0    !important}
+
+  /* Animations: X-axis مثل Desktop */
+  .page.expanded-cool .cool{animation:stretchPopRight var(--dur) cubic-bezier(.34,1.4,.64,1)}
+  .page.expanded-veh  .veh {animation:stretchPopLeft  var(--dur) cubic-bezier(.34,1.4,.64,1)}
+
+  /* is-closing: X-axis */
+  .cool.is-closing .sec-main{transform:translateX(-60px) !important}
+  .veh.is-closing  .sec-main{transform:translateX( 60px) !important}
+
+  /* sec-inner slide: X-axis */
+  .cool .sec-inner{transform:translateX(-28px);transition:opacity .35s ease .38s,transform .48s cubic-bezier(.4,0,.2,1) .38s}
+  .veh  .sec-inner{transform:translateX( 28px);transition:opacity .35s ease .38s,transform .48s cubic-bezier(.4,0,.2,1) .38s}
+  .cool.is-expanded .sec-inner,
+  .veh.is-expanded  .sec-inner{transform:translateX(0)}
+
+  /* القسم المنكمش: X-axis */
+  .page.expanded-cool .veh .sec-main,
+  .page.expanded-veh  .cool .sec-main{transform:translateX(50px) !important;opacity:0}
+
   .sec{overflow:hidden;padding:6px 0}
 
 .sec-main{
@@ -586,8 +631,6 @@ body.lang-en .item-sub{font-size:11px}
   .sec:not(.is-expanded) .dot{width:3px;height:3px;margin-top:4px}
 
   .bar{display:none}
-
-.sec-icon{ width:clamp(50px,18vh,80px) !important; height:auto !important; }
 
   /* Landscape: العنوان في المنتصف لعربي وإنجليزي */
   body:not(.lang-en) .title-row{text-align:center;align-items:center}
@@ -719,11 +762,20 @@ body.lang-en .item-sub{font-size:11px}
 
   /* ─── ORIENTATION CHANGE ────────────────────── */
   let orientTimer;
-  window.addEventListener('resize',()=>{
+  screen.orientation?.addEventListener('change', ()=>{
     clearTimeout(orientTimer);
-    orientTimer=setTimeout(()=>{
-      void document.body.offsetHeight; // force reflow فقط
-    },100);
+    orientTimer = setTimeout(()=>{
+      // إذا كان هناك section مفتوح أغلقه أولاً
+      if(isExpanded){
+        const page = document.getElementById('page');
+        document.querySelectorAll('.sec').forEach(s=>s.classList.remove('is-expanded','is-closing'));
+        page.classList.remove('expanded-cool','expanded-veh');
+        isExpanded = false;
+      }
+      equalizeItemsHeight();
+      equalizeItemsWidth();
+      syncIconWidth();
+    }, 120);
   });
 
   function expandSection(e, name) {
@@ -774,24 +826,21 @@ function equalizeItemsHeight(){
   }
 function equalizeItemsWidth(){
   const lists = document.querySelectorAll('.items');
-  lists.forEach(l => { l.style.width = ''; l.style.maxWidth = ''; });
+  lists.forEach(l => l.style.width = '');
   const isLandscape = window.innerWidth <= 860 && window.innerWidth > window.innerHeight;
   if(!isLandscape) return;
-  // قِس العرض الطبيعي (fit-content) بدون قيود
-  lists.forEach(l => { l.style.width = 'fit-content'; l.style.maxWidth = 'none'; });
-  requestAnimationFrame(()=>{
+  setTimeout(()=>{
     const maxW = Math.max(...[...lists].map(l => l.getBoundingClientRect().width));
-    lists.forEach(l => { l.style.width = maxW + 'px'; l.style.maxWidth = 'none'; });
-  });
+    lists.forEach(l => l.style.width = maxW + 'px');
+  }, 60);
 }
 
-  window.addEventListener('resize',()=>{ clearTimeout(_iconTimer); _iconTimer=setTimeout(()=>{ syncIconWidth(); equalizeItemsHeight(); equalizeItemsWidth(); },80); });
-  document.fonts.ready.then(()=>{ syncIconWidth(); equalizeItemsHeight(); equalizeItemsWidth(); });
-  setTimeout(()=>{ syncIconWidth(); equalizeItemsHeight(); equalizeItemsWidth(); },200);
+  window.addEventListener('resize',()=>{ clearTimeout(_iconTimer); _iconTimer=setTimeout(()=>{ syncIconWidth(); equalizeItemsHeight(); },80); });
+  document.fonts.ready.then(()=>{ syncIconWidth(); equalizeItemsHeight(); });
+  setTimeout(()=>{ syncIconWidth(); equalizeItemsHeight(); },200);
 
   function syncIconWidth(){
     document.querySelectorAll('.sec-title-en').forEach(title=>{
-      if(window.innerWidth <= 860 && window.innerWidth > window.innerHeight) return;
       const row = title.closest('.title-row');
       if(!row) return;
       const icon = row.querySelector('.sec-icon');
