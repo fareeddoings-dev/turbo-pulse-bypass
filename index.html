@@ -31,8 +31,8 @@
   --cool-bg-opacity:0.4;
   --veh-bg-opacity:0.4;
   /* تمويه الخلفية (0=واضح, 10px=ضبابي) */
-  --cool-bg-blur:0px;
-  --veh-bg-blur:0px;
+  --cool-bg-blur:5px;
+  --veh-bg-blur:5px;
 }
 
 html,body{height:100%;overflow:hidden}
@@ -294,7 +294,7 @@ body.lang-en .back-btn{font-family:var(--font-en);font-size:12px;letter-spacing:
 /* ─── SECTION CONTENT STYLES ─────────────────────── */
 .sec-logo{height:80px;width:auto;max-width:280px;object-fit:contain;margin-bottom:28px}
 
-.sec-icon{display:block;width:auto;height:auto;max-width:60px;margin:0 auto 6px}
+.sec-icon{display:block;width:auto;height:auto;max-width:none;margin:0 auto 6px}
 
 .sec-label{
   font-family:var(--font-en);font-size:11px;letter-spacing:5px;
@@ -326,6 +326,31 @@ body.lang-en .sec-title-ar{
 .veh  .bar{background:var(--veh-accent)}
 
 .items{list-style:none;display:flex;flex-direction:column;gap:10px;width:100%;max-width:340px}
+
+/* ─── GLASS CARD — قائمة المنتجات ───────────── */
+.items{
+  background:rgba(255,255,255,0.52);
+  backdrop-filter:blur(16px) saturate(180%);
+  -webkit-backdrop-filter:blur(16px) saturate(180%);
+  border:1px solid rgba(255,255,255,0.72);
+  border-radius:20px;
+  padding:22px 26px;
+  box-shadow:
+    0 6px 32px rgba(0,0,0,0.07),
+    inset 0 1px 0 rgba(255,255,255,0.95);
+  justify-content:center;
+}
+.cool .items{border-top:2px solid rgba(14,109,181,0.18)}
+.veh  .items{border-top:2px solid rgba(184,98,10,0.18)}
+
+@media(max-width:860px){
+  .items{
+    padding:14px 16px;
+    border-radius:14px;
+    backdrop-filter:blur(10px) saturate(150%);
+    -webkit-backdrop-filter:blur(10px) saturate(150%);
+  }
+}
 
 .item{display:flex;align-items:flex-start;gap:12px;transition:transform .2s}
 .item:hover{transform:translateY(-1px)}
@@ -735,6 +760,30 @@ body.lang-en .item-sub{font-size:11px}
     // أعِد تفعيل الـ click بعد انتهاء الـ collapse
     setTimeout(() => { isExpanded = false; }, 700);
   }
+
+function equalizeItemsHeight(){
+    const lists = document.querySelectorAll('.items');
+    lists.forEach(l=>l.style.minHeight='');
+    if(window.innerWidth > 860){
+      const maxH = Math.max(...[...lists].map(l=>l.scrollHeight));
+      lists.forEach(l=>l.style.minHeight = maxH+'px');
+    }
+  }
+  window.addEventListener('resize',()=>{ clearTimeout(_iconTimer); _iconTimer=setTimeout(()=>{ syncIconWidth(); equalizeItemsHeight(); },80); });
+  document.fonts.ready.then(()=>{ syncIconWidth(); equalizeItemsHeight(); });
+  setTimeout(()=>{ syncIconWidth(); equalizeItemsHeight(); },200);
+
+  function syncIconWidth(){
+    document.querySelectorAll('.sec-title-en').forEach(title=>{
+      const row = title.closest('.title-row');
+      if(!row) return;
+      const icon = row.querySelector('.sec-icon');
+      if(!icon) return;
+      const w = title.getBoundingClientRect().width;
+      if(w > 0){ icon.style.width = (w * 1.2) + 'px'; icon.style.height = 'auto'; }
+    });
+  }
+
 
   function toggleLang() {
     isAr = !isAr;
