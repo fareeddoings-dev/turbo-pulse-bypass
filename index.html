@@ -415,14 +415,23 @@ body.lang-en .item-sub{font-size:11px}
     flex-direction:column;
     align-items:center;
     justify-content:flex-start;
-    padding:14px 20px;
+    padding:56px 20px 14px;
     min-width:0;
     height:100%;
     overflow-y:auto;
     -webkit-overflow-scrolling:touch;
   }
 
-  .sec-logo{height:50px;width:auto;max-width:90px;margin-bottom:4px;flex-shrink:0}
+  .sec-logo{
+    position:absolute;
+    top:8px;
+    left:50%;
+    transform:translateX(-50%);
+    height:40px;
+    width:auto;
+    max-width:130px;
+    z-index:3;
+  }
 
   .sec-text{
     display:flex;
@@ -447,6 +456,16 @@ body.lang-en .item-sub{font-size:11px}
     padding:0;
     justify-content:center;
   }
+.sec-title-en, .sec-title-ar{
+    transition:font-size 0.4s var(--ease);
+  }
+  .sec-icon{
+    transition:width 0.4s var(--ease), height 0.4s var(--ease) !important;
+  }
+  .sec-logo{
+    transition:top 0.4s var(--ease), height 0.4s var(--ease);
+  }
+
   .sec:not(.is-expanded) .sec-title-en{
     font-size:clamp(40px,10vw,64px);
     opacity:1;
@@ -774,18 +793,28 @@ body.lang-en .item-sub{font-size:11px}
   let orientTimer;
   screen.orientation?.addEventListener('change', ()=>{
     clearTimeout(orientTimer);
+    if(isExpanded){
+      const page = document.getElementById('page');
+      document.querySelectorAll('.sec').forEach(s=>s.classList.remove('is-expanded','is-closing'));
+      page.classList.remove('expanded-cool','expanded-veh');
+      isExpanded = false;
+    }
+    // أخفِ المحتوى خاطف → layout يتغير وهو مخفي → أظهره بسموث
+    document.querySelectorAll('.sec-main').forEach(m=>{
+      m.style.transition = 'opacity 0.15s ease';
+      m.style.opacity = '0';
+    });
     orientTimer = setTimeout(()=>{
-      // إذا كان هناك section مفتوح أغلقه أولاً
-      if(isExpanded){
-        const page = document.getElementById('page');
-        document.querySelectorAll('.sec').forEach(s=>s.classList.remove('is-expanded','is-closing'));
-        page.classList.remove('expanded-cool','expanded-veh');
-        isExpanded = false;
-      }
       equalizeItemsHeight();
       equalizeItemsWidth();
       syncIconWidth();
-    }, 120);
+      requestAnimationFrame(()=>{
+        document.querySelectorAll('.sec-main').forEach(m=>{
+          m.style.transition = 'opacity 0.45s ease';
+          m.style.opacity = '';
+        });
+      });
+    }, 200);
   });
 
   function expandSection(e, name) {
