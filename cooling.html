@@ -37,7 +37,7 @@ body {
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;
   opacity: 0;
-  animation: pageIn .42s var(--ease) .08s forwards;
+  animation: pageIn .22s var(--ease) .04s forwards;
 }
 @keyframes pageIn { to { opacity: 1; } }
 
@@ -611,9 +611,11 @@ body.lang-en .footer-row a, body.lang-en .footer-row span { font-family: var(--f
 let isAr = true;
 
 function goHome() {
-  document.body.style.transition = 'opacity .3s ease';
-  document.body.style.opacity   = '0';
-  setTimeout(() => { window.location.href = 'index.html'; }, 290);
+  document.body.style.overflow   = 'hidden';
+  document.body.style.transition = 'transform .18s cubic-bezier(.55,0,1,.45), opacity .14s ease .04s';
+  document.body.style.transform  = 'translateX(60px)';
+  document.body.style.opacity    = '0';
+  setTimeout(() => { window.location.href = 'index.html?back=cool'; }, 160);
 }
 
 function toggleLang() {
