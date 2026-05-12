@@ -775,11 +775,10 @@ function equalizeItemsWidth(){
   lists.forEach(l => l.style.width = '');
   const isLandscape = window.innerWidth <= 860 && window.innerWidth > window.innerHeight;
   if(!isLandscape) return;
-  lists.forEach(l => l.style.width = 'fit-content');
-  requestAnimationFrame(()=>{
-    const maxW = Math.max(...[...lists].map(l => l.scrollWidth));
+  setTimeout(()=>{
+    const maxW = Math.max(...[...lists].map(l => l.getBoundingClientRect().width));
     lists.forEach(l => l.style.width = maxW + 'px');
-  });
+  }, 60);
 }
 
   window.addEventListener('resize',()=>{ clearTimeout(_iconTimer); _iconTimer=setTimeout(()=>{ syncIconWidth(); equalizeItemsHeight(); equalizeItemsWidth(); },80); });
