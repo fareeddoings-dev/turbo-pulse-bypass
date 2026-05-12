@@ -28,7 +28,7 @@
 .panel-cool{--accent:#0e6db5;--accent-dark:#094d82;--accent-muted:rgba(14,109,181,0.12);--accent-bg:#f0f7fd}
 .panel-veh {--accent:#b8620a;--accent-dark:#8a4807;--accent-muted:rgba(184,98,10,.12);--accent-bg:#fdf6ee}
 
-html,body{height:100%;overflow:hidden}
+html,body{height:100%}
 body{font-family:var(--ar);background:#f5f5f5;color:var(--text-main);-webkit-font-smoothing:antialiased}
 
 /* ── Scene / Track ───────────────────────────── */
@@ -52,11 +52,11 @@ body{font-family:var(--ar);background:#f5f5f5;color:var(--text-main);-webkit-fon
 
 /* Portrait: vertical track */
 @media(max-width:860px) and (orientation:portrait){
-  .track{flex-direction:column;width:100%;height:300vh}
-  .track.at-main{transform:translateY(-100vh)}
+  .track{flex-direction:column;width:100%;height:300vh;height:300dvh}
+  .track.at-main{transform:translateY(-100vh);transform:translateY(-100dvh)}
   .track.at-cool{transform:translateY(0)}
-  .track.at-veh {transform:translateY(-200vh)}
-  .panel{width:100%;height:100vh}
+  .track.at-veh {transform:translateY(-200vh);transform:translateY(-200dvh)}
+  .panel{width:100%;height:100vh;height:100dvh}
   .panel-veh{order:3}
   .panel-main{order:2}
   .panel-cool{order:1}
@@ -84,7 +84,9 @@ body{font-family:var(--ar);background:#f5f5f5;color:var(--text-main);-webkit-fon
 .sec{
   width:50%;flex:0 0 50%;
   position:relative;overflow:hidden;display:flex;cursor:pointer;
-  transition:width .5s var(--ease),height .5s var(--ease),flex-basis .5s var(--ease);
+  transform:translateZ(0);          /* ★ own compositing layer → fixes backdrop-filter blur artifact */
+  -webkit-transform:translateZ(0);
+  transition:width .48s var(--ease),height .48s var(--ease),flex-basis .48s var(--ease);
 }
 .sec-arrow{
   position:absolute;z-index:5;font-size:28px;font-weight:300;
@@ -162,14 +164,12 @@ body{font-family:var(--ar);background:#f5f5f5;color:var(--text-main);-webkit-fon
 .sec-title-en{
   font-family:var(--en);font-size:72px;font-weight:800;
   line-height:1;letter-spacing:-2px;text-transform:uppercase;margin-bottom:2px;
-  transition:font-size .45s var(--ease);
 }
 .cool .sec-title-en{color:var(--cool)}
 .veh  .sec-title-en{color:var(--veh)}
 .sec-title-ar{
   font-family:var(--ar);font-size:24px;font-weight:700;
   color:var(--dim);line-height:1.2;margin-bottom:16px;
-  transition:font-size .45s var(--ease);
 }
 body.lang-en .sec-title-ar{font-family:var(--en);font-size:20px}
 .bar{width:36px;height:3px;border-radius:2px;margin-bottom:24px;flex-shrink:0}
@@ -234,7 +234,21 @@ body.lang-en .header-div-ar{font-family:var(--en);font-size:11px;letter-spacing:
 body.lang-en .back-btn{font-family:var(--en);font-size:12px;letter-spacing:.4px}
 .back-arrow{font-size:15px;line-height:1}
 
-/* ── Hero ─────────────────────────────────────── */
+/* ── Language toggle fade ─────────────────────── */
+.sec-title-en,.sec-title-ar,.item-main,.item-sub,
+.card-ar,.hero-title,.section-title,
+.header-div-ar,[data-ar]{
+  transition:opacity .18s ease, font-size .42s var(--ease);
+}
+body.lang-fading .sec-title-en,
+body.lang-fading .sec-title-ar,
+body.lang-fading .item-main,
+body.lang-fading .item-sub,
+body.lang-fading .card-ar,
+body.lang-fading .hero-title,
+body.lang-fading .section-title,
+body.lang-fading .header-div-ar,
+body.lang-fading [data-ar]{opacity:0}
 .page-body{padding-top:var(--header-h)}
 .hero{
   position:relative;height:190px;display:flex;align-items:center;
@@ -329,28 +343,29 @@ body.lang-en .footer-row a,body.lang-en .footer-row span{font-family:var(--en);f
   .panel-main{overflow:hidden}
   .main-page{
     flex-direction:column;
-    height:100vh;
+    height:100vh;      /* fallback */
+    height:100dvh;     /* ★ excludes browser toolbar — fixes the cut-off */
     overflow:hidden;
   }
   /* Collapse line but keep langBtn floating at boundary */
   .divider{
-    width:100%;height:0;flex-shrink:0;
+    width:100%;height:0;flex:0 0 0;flex-shrink:0;
     position:relative;z-index:200;overflow:visible;
     background:transparent;
   }
-  /* ★ Explicit 50vh — most reliable across all mobile browsers */
+  /* ★ 50dvh = exactly half the VISIBLE viewport */
   .sec{
     width:100%!important;
     height:50vh!important;
-    flex:0 0 50vh!important;
+    height:50dvh!important;
+    flex:0 0 50dvh!important;
     min-height:0;
     overflow:hidden!important;
   }
   .sec-main{
     flex-direction:column;align-items:center;justify-content:flex-start;
     padding:44px 8px 8px;
-    min-width:0;
-    width:100%;height:100%;
+    min-width:0;width:100%;height:100%;
     overflow-y:auto;
     -webkit-overflow-scrolling:touch;
   }
@@ -359,9 +374,11 @@ body.lang-en .footer-row a,body.lang-en .footer-row span{font-family:var(--en);f
     height:30px;max-width:110px;z-index:3;
   }
   .sec-icon{width:auto;max-width:none;max-height:44px;margin:0 auto 3px}
+  /* ★ Lock sec-text direction — never changes with language toggle */
   .sec-text{
     display:flex;flex-direction:row;align-items:stretch;
     flex:1;min-width:0;width:100%;justify-content:space-between;gap:8px;
+    direction:rtl; /* title always RIGHT, items always LEFT */
   }
   .title-row{
     display:flex;flex-direction:column;align-items:center;
@@ -372,19 +389,19 @@ body.lang-en .footer-row a,body.lang-en .footer-row span{font-family:var(--en);f
   .sec-title-ar{font-size:clamp(13px,3.8vw,22px);margin-bottom:0;opacity:.7;line-height:1.1}
   .items{
     gap:4px;flex:1 1 0;min-width:0;
-    align-items:flex-start;width:auto;max-width:none;
+    align-items:flex-end;width:auto;max-width:none;
     justify-content:center;padding:8px 12px;border-radius:10px;
-    /* Remove heavy backdrop on mobile for performance */
     backdrop-filter:none;-webkit-backdrop-filter:none;
     background:rgba(255,255,255,.6);
+    direction:rtl;
   }
+  /* English: flip item text direction only, layout stays identical */
+  body.lang-en .items{direction:ltr;align-items:flex-start}
+  body.lang-en .item-text-wrap{text-align:left}
   .dot{width:4px;height:4px;margin-top:5px}
   .item-main{font-size:clamp(12px,3vw,15px);line-height:1.35}
   .item-sub{font-size:clamp(10px,2.4vw,12px);line-height:1.2}
   .sec-main::after{display:none}
-  body:not(.lang-en) .items{direction:rtl;align-items:flex-start}
-  body.lang-en .sec-text{direction:ltr}
-  body.lang-en .items{align-items:flex-start}
 
   /* Sub-pages */
   .hero{height:140px}
@@ -790,6 +807,7 @@ body.lang-en .footer-row a,body.lang-en .footer-row span{font-family:var(--en);f
 <script>
 var isAr = true;
 var rt;
+var lastOrient = window.innerWidth > window.innerHeight ? 'land' : 'port';
 
 function go(name) {
   var track = document.getElementById('track');
@@ -797,76 +815,90 @@ function go(name) {
 }
 
 function toggleLang() {
-  isAr = !isAr;
-  var label = isAr ? 'EN' : 'عربي';
-  document.getElementById('langBtn').textContent = label;
-  document.body.classList.toggle('lang-en', !isAr);
-  document.querySelectorAll('.lang-toggle').forEach(function(b){ b.textContent = label; });
-  document.querySelectorAll('[data-ar]').forEach(function(el) {
-    var v = isAr ? el.getAttribute('data-ar') : el.getAttribute('data-en');
-    if (v) el.textContent = v;
-  });
-  syncIconWidths();
+  document.body.classList.add('lang-fading');
+  setTimeout(function(){
+    isAr = !isAr;
+    var label = isAr ? 'EN' : 'عربي';
+    document.getElementById('langBtn').textContent = label;
+    document.body.classList.toggle('lang-en', !isAr);
+    document.querySelectorAll('.lang-toggle').forEach(function(b){ b.textContent = label; });
+    document.querySelectorAll('[data-ar]').forEach(function(el){
+      var v = isAr ? el.getAttribute('data-ar') : el.getAttribute('data-en');
+      if (v) el.textContent = v;
+    });
+    syncIconWidths();
+    // tiny delay before removing fade so opacity:0→1 transition is visible
+    requestAnimationFrame(function(){
+      requestAnimationFrame(function(){
+        document.body.classList.remove('lang-fading');
+      });
+    });
+  }, 190);
 }
 
 function syncIconWidths() {
-  document.querySelectorAll('.sec-icon').forEach(function(icon) {
+  document.querySelectorAll('.sec-icon').forEach(function(icon){
     var tr = icon.closest('.title-row');
     if (!tr) return;
     var titleEl = tr.querySelector('.sec-title-en');
     if (!titleEl) return;
     var w = titleEl.getBoundingClientRect().width;
-    if (w > 0) { icon.style.width = w + 'px'; icon.style.maxWidth = 'none'; }
+    if (w > 0){ icon.style.width = w + 'px'; icon.style.maxWidth = 'none'; }
   });
 }
 
-// Suppress track slide transition during resize (not orientation change)
-window.addEventListener('resize', function() {
-  var t = document.getElementById('track');
-  t.style.transition = 'none';
-  clearTimeout(rt);
-  rt = setTimeout(function(){ t.style.transition = ''; }, 150);
-});
-
-/* ── Smooth orientation transition ───────────────────────────
-   When device rotates, flex-direction changes instantly (not
-   transitionable). Strategy: snapshot current sizes → apply
-   new layout → animate FROM snapshot TO new sizes via FLIP.
-──────────────────────────────────────────────────────────── */
-var lastOrient = window.innerWidth > window.innerHeight ? 'land' : 'port';
-
-window.addEventListener('resize', function() {
+/* ── Orientation change: FLIP animation ──────────────────
+   1. Snapshot current sec sizes (FIRST)
+   2. Lock them with inline styles
+   3. Next frame: new media query has applied, release locks
+      → CSS transitions animate from old sizes to new sizes
+───────────────────────────────────────────────────────── */
+window.addEventListener('resize', function(){
   var orient = window.innerWidth > window.innerHeight ? 'land' : 'port';
-  if (orient === lastOrient) return;
-  lastOrient = orient;
 
-  var secs = document.querySelectorAll('.sec');
-  var mainPage = document.querySelector('.main-page');
+  if (orient !== lastOrient) {
+    /* ── Orientation changed ── */
+    lastOrient = orient;
 
-  // 1. Record current rects (FIRST)
-  var rects = Array.from(secs).map(function(s){ return s.getBoundingClientRect(); });
+    var secs  = document.querySelectorAll('.panel-main .sec');
+    var track = document.getElementById('track');
 
-  // 2. Freeze sizes so layout doesn't jump yet
-  secs.forEach(function(s, i){
-    s.style.transition = 'none';
-    s.style.width  = rects[i].width  + 'px';
-    s.style.height = rects[i].height + 'px';
-    s.style.flex   = '0 0 auto';
-  });
-
-  // 3. Let browser apply new media query (one frame)
-  requestAnimationFrame(function(){
-    requestAnimationFrame(function(){
-      // 4. Release fixed sizes — CSS takes over → transition fires
-      secs.forEach(function(s){
-        s.style.transition = '';
-        s.style.width  = '';
-        s.style.height = '';
-        s.style.flex   = '';
-      });
-      syncIconWidths();
+    // Snapshot
+    var snaps = Array.from(secs).map(function(s){
+      var r = s.getBoundingClientRect();
+      return { w: r.width, h: r.height };
     });
-  });
+
+    // Freeze sec sizes + pause track slide transition
+    track.style.transition = 'none';
+    secs.forEach(function(s, i){
+      s.style.transition = 'none';
+      s.style.width  = snaps[i].w + 'px';
+      s.style.height = snaps[i].h + 'px';
+      s.style.flex   = '0 0 auto';
+    });
+
+    // Wait 2 frames (media query applies) then animate
+    requestAnimationFrame(function(){
+      requestAnimationFrame(function(){
+        track.style.transition = '';
+        secs.forEach(function(s){
+          s.style.transition = '';
+          s.style.width  = '';
+          s.style.height = '';
+          s.style.flex   = '';
+        });
+        syncIconWidths();
+      });
+    });
+
+  } else {
+    /* ── Regular resize (keyboard, browser chrome) ── */
+    var track = document.getElementById('track');
+    track.style.transition = 'none';
+    clearTimeout(rt);
+    rt = setTimeout(function(){ track.style.transition = ''; syncIconWidths(); }, 160);
+  }
 });
 
 if (document.fonts && document.fonts.ready) {
