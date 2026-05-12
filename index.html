@@ -561,9 +561,9 @@ body.lang-en .item-sub{font-size:11px}
   }
   .items{
     gap:2px;
+    flex:1 1 0;
+    max-width:60%;
     min-width:0;
-    width:fit-content;
-    flex:0 0 auto;
     align-items:flex-start;
     order:1;
     align-self:stretch;
@@ -781,9 +781,9 @@ function equalizeItemsWidth(){
   }, 60);
 }
 
-  window.addEventListener('resize',()=>{ clearTimeout(_iconTimer); _iconTimer=setTimeout(()=>{ syncIconWidth(); equalizeItemsHeight(); equalizeItemsWidth(); },80); });
-  document.fonts.ready.then(()=>{ syncIconWidth(); equalizeItemsHeight(); equalizeItemsWidth(); });
-  setTimeout(()=>{ syncIconWidth(); equalizeItemsHeight(); equalizeItemsWidth(); },200);
+  window.addEventListener('resize',()=>{ clearTimeout(_iconTimer); _iconTimer=setTimeout(()=>{ syncIconWidth(); equalizeItemsHeight(); },80); });
+  document.fonts.ready.then(()=>{ syncIconWidth(); equalizeItemsHeight(); });
+  setTimeout(()=>{ syncIconWidth(); equalizeItemsHeight(); },200);
 
   function syncIconWidth(){
     document.querySelectorAll('.sec-title-en').forEach(title=>{
