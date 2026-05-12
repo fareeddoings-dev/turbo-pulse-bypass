@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+<title>VOLGA | حلول التبريد والمركبات</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&family=Barlow+Condensed:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --cool:   #0e6db5;
+  --veh:    #b8620a;
+  --dim:    #555;
+  --border: #d8d8d8;
+  --ar:     'Tajawal',    sans-serif;
+  --en:     'Barlow Condensed', sans-serif;
+  --dur:    0.5s;
+  --ease:   cubic-bezier(.4,0,.2,1);
+}
+
+html,body{height:100%;overflow:hidden}
+body{font-family:var(--ar);background:#fff;color:#111;-webkit-font-smoothing:antialiased}
+
+/* ── Layout ───────────────────────────────────────── */
+.page{display:flex;height:100vh}
+
+/* ── Divider ──────────────────────────────────────── */
+.divider{
+  width:1px;background:var(--border);
+  position:relative;flex-shrink:0;z-index:100;
+  transition:width var(--dur) var(--ease), opacity calc(var(--dur)*.5) ease;
+}
+.page.exp-cool .divider,
+.page.exp-veh  .divider{width:0;opacity:0}
+
+#langBtn{
+  position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  background:#fff;border:1px solid #ccc;color:#444;
+  font-family:var(--en);font-size:11px;letter-spacing:2px;text-transform:uppercase;
+  padding:8px 18px;border-radius:40px;cursor:pointer;white-space:nowrap;
+  box-shadow:0 2px 8px rgba(0,0,0,.09);
+  transition:background .2s, opacity .3s;
+}
+#langBtn:hover{background:#f0f0f0}
+.page.exp-cool .divider #langBtn,
+.page.exp-veh  .divider #langBtn{opacity:0;pointer-events:none}
+
+/* ── Sections ─────────────────────────────────────── */
+.sec{
+  width:50%;max-width:50%;flex-shrink:0;
+  position:relative;overflow:hidden;display:flex;cursor:pointer;
+  transition:max-width var(--dur) var(--ease), width var(--dur) var(--ease);
+}
+.page.exp-cool .cool{max-width:100%;width:100%}
+.page.exp-cool .veh {max-width:0;   width:0}
+.page.exp-veh  .veh {max-width:100%;width:100%}
+.page.exp-veh  .cool{max-width:0;   width:0}
+.page.exp-cool .cool,
+.page.exp-veh  .veh{cursor:default}
+
+/* Background image layer */
+.sec::before{
+  content:'';position:absolute;inset:0;
+  background-size:cover;background-position:center;
+  z-index:0;pointer-events:none;opacity:.2;
+}
+.cool::before{background-image:url('./volga_havc_bg.png');background-color:#eef6fc}
+.veh::before {background-image:url('./volga_svs_bg.png'); background-color:#fdf6ee}
+
+/* Glass blur layer — فوق الخلفية، تحت المحتوى */
+.sec::after{
+  content:'';position:absolute;inset:0;z-index:1;
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  pointer-events:none;
+}
+
+/* ── Section main ─────────────────────────────────── */
+.sec-main{
+  width:100%;min-width:340px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;padding:56px;
+  position:relative;z-index:2;
+  background:rgba(255,255,255,.15);
+  transition:opacity .3s ease, background .35s ease, transform .45s var(--ease);
+}
+.cool .sec-main:hover{background:rgba(14,109,181,.11)}
+.veh  .sec-main:hover{background:rgba(184,98,10,.11)}
+.page.exp-cool .cool .sec-main:hover,
+.page.exp-veh  .veh  .sec-main:hover{background:#fff}
+
+/* Leaving: fade + slide before navigation */
+.sec.leaving .sec-main{opacity:0;pointer-events:none}
+.cool.leaving .sec-main{transform:translateX(-60px)}
+.veh.leaving  .sec-main{transform:translateX( 60px)}
+
+/* Hover arrows */
+.sec-main::after{
+  content:'';font-family:var(--en);font-size:22px;
+  position:absolute;bottom:36px;opacity:0;pointer-events:none;
+  transition:opacity .35s, transform .35s;
+}
+.cool .sec-main::after{content:'←';color:var(--cool);left:36px; transform:translateX( 8px)}
+.veh  .sec-main::after{content:'→';color:var(--veh); right:36px;transform:translateX(-8px)}
+.sec .sec-main:hover::after{opacity:1;transform:translateX(0)}
+.page.exp-cool .cool .sec-main::after,
+.page.exp-veh  .veh  .sec-main::after{display:none}
+
+/* ── Typography ───────────────────────────────────── */
+.sec-logo{height:80px;width:auto;max-width:280px;object-fit:contain;margin-bottom:28px}
+.sec-icon{display:block;max-width:80px;height:auto;margin:0 auto 6px}
+
+.title-row{display:contents} /* desktop: transparent wrapper */
+
+.sec-title-en{
+  font-family:var(--en);font-size:72px;font-weight:800;
+  line-height:1;letter-spacing:-2px;text-transform:uppercase;margin-bottom:2px;
+}
+.cool .sec-title-en{color:var(--cool)}
+.veh  .sec-title-en{color:var(--veh)}
+
+.sec-title-ar{
+  font-family:var(--ar);font-size:24px;font-weight:700;
+  color:var(--dim);line-height:1.2;margin-bottom:16px;
+}
+body.lang-en .sec-title-ar{font-family:var(--en);font-size:20px}
+
+.bar{width:36px;height:3px;border-radius:2px;margin-bottom:24px;flex-shrink:0}
+.cool .bar{background:var(--cool)}
+.veh  .bar{background:var(--veh)}
+
+/* ── Items (glass card) ───────────────────────────── */
+.items{
+  list-style:none;display:flex;flex-direction:column;gap:10px;
+  width:100%;max-width:340px;justify-content:center;
+  background:rgba(255,255,255,.52);
+  backdrop-filter:blur(16px) saturate(180%);
+  -webkit-backdrop-filter:blur(16px) saturate(180%);
+  border:1px solid rgba(255,255,255,.72);
+  border-radius:20px;padding:22px 26px;
+  box-shadow:0 6px 32px rgba(0,0,0,.07),inset 0 1px 0 rgba(255,255,255,.95);
+}
+.cool .items{border-top:2px solid rgba(14,109,181,.18)}
+.veh  .items{border-top:2px solid rgba(184,98,10,.18)}
+
+.item{display:flex;align-items:flex-start;gap:12px;transition:transform .2s}
+.item:hover{transform:translateY(-1px)}
+.dot{width:5px;height:5px;border-radius:50%;margin-top:9px;flex-shrink:0;opacity:.7}
+.cool .dot{background:var(--cool)}
+.veh  .dot{background:var(--veh)}
+.item-text-wrap{text-align:right}
+.item-main{font-size:15px;font-weight:700;line-height:1.5}
+.item-sub{font-size:11.5px;color:var(--dim);font-family:var(--en);letter-spacing:.2px;margin-top:2px;font-weight:700}
+
+body.lang-en .item{direction:ltr}
+body.lang-en .item-main{font-family:var(--en);font-size:14px}
+body.lang-en .item-text-wrap{text-align:left}
+
+/* ── Entrance ─────────────────────────────────────── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.sec-main>*{animation:fadeUp .65s ease both}
+.sec-main>*:nth-child(1){animation-delay:.04s}
+.sec-main>*:nth-child(2){animation-delay:.11s}
+.sec-main>*:nth-child(3){animation-delay:.18s}
+.sec-main>*:nth-child(4){animation-delay:.25s}
+.sec-main>*:nth-child(5){animation-delay:.32s}
+
+/* ── Mobile portrait ──────────────────────────────── */
+@media(max-width:860px){
+  html,body{height:auto;overflow:visible}
+  body{min-height:calc(100dvh + 1px);overflow-y:auto}
+  .page{flex-direction:column;height:100dvh;overflow:hidden}
+
+  .divider{
+    width:100%;height:1px;
+    transition:height var(--dur) var(--ease), opacity calc(var(--dur)*.5) ease;
+  }
+  .page.exp-cool .divider,
+  .page.exp-veh  .divider{height:0;width:100%;opacity:0}
+
+  .sec{
+    width:100% !important;max-width:100% !important;
+    height:50%;max-height:50dvh;
+    transition:max-height var(--dur) var(--ease), height var(--dur) var(--ease);
+  }
+  .page.exp-cool .cool{max-height:100dvh !important;height:100dvh !important}
+  .page.exp-cool .veh {max-height:0     !important;height:0     !important}
+  .page.exp-veh  .veh {max-height:100dvh !important;height:100dvh !important}
+  .page.exp-veh  .cool{max-height:0     !important;height:0     !important}
+
+  .sec-main{
+    flex-direction:column;align-items:center;justify-content:flex-start;
+    padding:56px 20px 14px;min-width:0;height:100%;overflow-y:auto;
+  }
+  .sec-logo{position:absolute;top:8px;left:50%;transform:translateX(-50%);height:40px;max-width:130px;z-index:3}
+  .sec-icon{display:none}
+  .sec-text{display:flex;flex-direction:row;align-items:stretch;flex:1;min-width:0;width:100%;justify-content:space-between;gap:16px}
+  .title-row{display:flex;flex-direction:column;align-items:center;text-align:center;gap:3px;flex-shrink:0;justify-content:center}
+  .bar{display:none}
+  .sec-title-en{font-size:clamp(40px,10vw,64px);margin-bottom:0;line-height:1}
+  .sec-title-ar{font-size:clamp(18px,4.5vw,26px);margin-bottom:0;opacity:.7;line-height:1.2}
+  .items{gap:4px;flex:1;min-width:0;align-items:flex-start;width:auto;max-width:none;justify-content:center;padding:10px 14px;border-radius:14px}
+  .dot{width:4px;height:4px;margin-top:6px}
+  .item-main{font-size:clamp(13px,3.2vw,16px)}
+  .item-sub{font-size:clamp(11px,2.6vw,13px)}
+  .sec-main::after{display:none}
+  body:not(.lang-en) .items{direction:rtl;align-items:flex-start}
+  body.lang-en .sec-text{direction:ltr}
+  body.lang-en .items{align-items:flex-start}
+
+  .cool.leaving .sec-main{transform:translateY( 40px)}
+  .veh.leaving  .sec-main{transform:translateY(-40px)}
+
+  /* collapsed section content */
+  .page.exp-cool .veh .sec-main,
+  .page.exp-veh  .cool .sec-main{transform:translateY(50px);opacity:0}
+}
+
+/* ── Mobile landscape ─────────────────────────────── */
+@media(max-width:860px) and (orientation:landscape){
+  .page{flex-direction:row;height:100dvh}
+  .divider{width:1px;height:100%;transition:width var(--dur) var(--ease), opacity calc(var(--dur)*.5) ease}
+  .page.exp-cool .divider,
+  .page.exp-veh  .divider{width:0;height:100%;opacity:0}
+  .sec{
+    width:50% !important;max-width:50% !important;
+    height:100dvh !important;max-height:100dvh !important;
+    transition:max-width var(--dur) var(--ease), width var(--dur) var(--ease) !important;
+  }
+  .page.exp-cool .cool{max-width:100% !important;width:100% !important}
+  .page.exp-cool .veh {max-width:0    !important;width:0    !important}
+  .page.exp-veh  .veh {max-width:100% !important;width:100% !important}
+  .page.exp-veh  .cool{max-width:0    !important;width:0    !important}
+  .sec-main{direction:ltr;flex-direction:row;align-items:center;justify-content:flex-start;padding:56px 20px 16px;gap:10px;height:100%;overflow-y:auto}
+  .sec-logo{position:absolute;top:12px;left:50%;transform:translateX(-50%);height:32px;max-width:100px;z-index:3}
+  .sec-text{display:flex;flex-direction:row;align-items:center;flex:1;min-width:0;justify-content:space-between}
+  .title-row{display:flex;flex-direction:column;align-items:center;text-align:center;gap:2px;flex:1 1 0;min-width:0;order:2}
+  .items{gap:2px;flex:1 1 0;min-width:0;align-items:flex-start;order:1;align-self:stretch;justify-content:center;padding:10px 14px}
+  .sec-title-en{font-size:clamp(32px,9vh,72px);margin-bottom:0}
+  .sec-title-ar{font-size:clamp(18px,4.5vh,32px);margin-bottom:0;opacity:.7}
+  .bar{display:none}
+  .item-main{font-size:clamp(11px,2.8vh,15px)}
+  .item-sub{font-size:clamp(10px,2.5vh,13px)}
+  .sec-main::after{display:none}
+  body:not(.lang-en) .items{direction:rtl;align-items:flex-end}
+  body:not(.lang-en) .title-row{text-align:center;align-items:center}
+  .cool.leaving .sec-main{transform:translateX(-60px) !important}
+  .veh.leaving  .sec-main{transform:translateX( 60px) !important}
+  .page.exp-cool .veh .sec-main,
+  .page.exp-veh  .cool .sec-main{transform:translateX(50px) !important;opacity:0}
+}
+</style>
+</head>
+<body>
+<div class="page" id="page">
+
+  <!-- COOLING — أول في DOM = يمين في RTL -->
+  <div class="sec cool" id="secCool" onclick="go('cool')">
+    <div class="sec-main">
+      <img src="./volga_havc.png" alt="VOLGA HVAC" class="sec-logo">
+      <div class="sec-text">
+        <div class="title-row">
+          <img src="./volga_havc_icon.png" alt="" class="sec-icon">
+          <div class="sec-title-en">COOLING</div>
+          <div class="sec-title-ar" data-ar="حلول التبريد الصناعي" data-en="Industrial Cooling Solutions">حلول التبريد الصناعي</div>
+        </div>
+        <div class="bar"></div>
+        <ul class="items">
+          <li class="item"><div class="dot"></div><div class="item-text-wrap">
+            <div class="item-main" data-ar="أبراج التبريد" data-en="Cooling Towers">أبراج التبريد</div>
+          </div></li>
+          <li class="item"><div class="dot"></div><div class="item-text-wrap">
+            <div class="item-main" data-ar="شيلرات تبريد المياه" data-en="Water Chillers">شيلرات تبريد المياه</div>
+          </div></li>
+          <li class="item"><div class="dot"></div><div class="item-text-wrap">
+            <div class="item-main" data-ar="المبادلات الحرارية" data-en="Heat Exchangers">المبادلات الحرارية</div>
+            <div class="item-sub">Shell &amp; Tube — Plate Type</div>
+          </div></li>
+          <li class="item"><div class="dot"></div><div class="item-text-wrap">
+            <div class="item-main" data-ar="الكويلات والرديتيرات" data-en="Coils &amp; Radiators">الكويلات والرديتيرات</div>
+            <div class="item-sub" data-ar="كوندنسر — إيفابوريتر" data-en="Condenser — Evaporator">كوندنسر — إيفابوريتر</div>
+          </div></li>
+          <li class="item"><div class="dot"></div><div class="item-text-wrap">
+            <div class="item-main" data-ar="غرف التبريد والتجميد" data-en="Cold &amp; Freezing Rooms">غرف التبريد والتجميد</div>
+          </div></li>
+          <li class="item"><div class="dot"></div><div class="item-text-wrap">
+            <div class="item-main" data-ar="وحدات تبريد وتجميد المركبات" data-en="Vehicle Refrigeration Units">وحدات تبريد وتجميد المركبات</div>
+          </div></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- DIVIDER -->
+  <div class="divider">
+    <button id="langBtn" onclick="toggleLang()">EN</button>
+  </div>
+
+  <!-- VEHICLES — آخر في DOM = يسار في RTL -->
+  <div class="sec veh" id="secVeh" onclick="go('veh')">
+    <div class="sec-main">
+      <img src="./volga_svs.png" alt="VOLGA Vehicles" class="sec-logo">
+      <div class="sec-text">
+        <div class="title-row">
+          <img src="./volga_svs_icon.png" alt="" class="sec-icon">
+          <div class="sec-title-en">VEHICLES</div>
+          <div class="sec-title-ar" data-ar="حلول المركبات" data-en="Vehicle Solutions">حلول المركبات</div>
+        </div>
+        <div class="bar"></div>
+        <ul class="items">
+          <li class="item"><div class="dot"></div><div class="item-text-wrap">
+            <div class="item-main" data-ar="صناديق جافة ومبردة ومجمدة" data-en="Dry, Refrigerated &amp; Frozen Boxes">صناديق جافة ومبردة ومجمدة</div>
+            <div class="item-sub" data-ar="للمركبات والفانات والشاحنات" data-en="For vehicles, vans &amp; trucks">للمركبات والفانات والشاحنات</div>
+          </div></li>
+          <li class="item"><div class="dot"></div><div class="item-text-wrap">
+            <div class="item-main" data-ar="تجهيز سيارات الإسعاف وتعديلها" data-en="Ambulance Fitting &amp; Modification">تجهيز سيارات الإسعاف وتعديلها</div>
+            <div class="item-sub" data-ar="تحويل السيارات وتوفير المعدات الطبية" data-en="Conversion &amp; medical equipment supply">تحويل السيارات وتوفير المعدات الطبية</div>
+          </div></li>
+          <li class="item"><div class="dot"></div><div class="item-text-wrap">
+            <div class="item-main" data-ar="مركبات ذوي الاحتياجات الخاصة" data-en="Special Needs Vehicle Solutions">مركبات ذوي الاحتياجات الخاصة</div>
+            <div class="item-sub" data-ar="رافعات ومقاعد المعاقين" data-en="Wheelchair lifts &amp; accessibility seating">رافعات ومقاعد المعاقين</div>
+          </div></li>
+          <li class="item"><div class="dot"></div><div class="item-text-wrap">
+            <div class="item-main" data-ar="الرافعات الذيلية للشاحنات" data-en="Truck Tail Lifts">الرافعات الذيلية للشاحنات</div>
+            <div class="item-sub" data-ar="1.5 إلى 2 طن" data-en="1.5 to 2 Tons">1.5 إلى 2 طن</div>
+          </div></li>
+          <li class="item"><div class="dot"></div><div class="item-text-wrap">
+            <div class="item-main" data-ar="تحويل السيارات إلى موبيليتي" data-en="Vehicle Mobility Conversion">تحويل السيارات إلى موبيليتي</div>
+          </div></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+</div>
+<script>
+let busy = false;
+let isAr = true;
+
+function go(name) {
+  if (busy) return;
+  busy = true;
+  const page = document.getElementById('page');
+  const sec  = document.getElementById(name === 'cool' ? 'secCool' : 'secVeh');
+  const url  = name === 'cool' ? 'cooling.html' : 'vehicles.html';
+
+  sec.classList.add('leaving');
+  page.classList.add('exp-' + name);
+
+  setTimeout(() => {
+    document.body.style.transition = 'opacity .13s ease';
+    document.body.style.opacity = '0';
+    setTimeout(() => { location.href = url; }, 110);
+  }, 210);
+}
+
+function toggleLang() {
+  isAr = !isAr;
+  document.getElementById('langBtn').textContent = isAr ? 'EN' : 'عربي';
+  document.body.classList.toggle('lang-en', !isAr);
+  document.querySelectorAll('[data-ar]').forEach(el => {
+    const v = isAr ? el.getAttribute('data-ar') : el.getAttribute('data-en');
+    if (v) el.textContent = v;
+  });
+}
+
+// ── Back-transition from sub-pages ────────────────
+(function(){
+  const from = new URLSearchParams(location.search).get('back');
+  if (!from) return;
+  const page = document.getElementById('page');
+  document.body.style.opacity = '0';
+  document.documentElement.style.setProperty('--dur', '0s');
+  page.classList.add('exp-' + from);
+  page.offsetHeight; // force reflow
+  requestAnimationFrame(() => {
+    document.documentElement.style.setProperty('--dur', '.27s');
+    document.body.style.transition = 'opacity .1s ease';
+    document.body.style.opacity = '1';
+    page.classList.remove('exp-' + from);
+    setTimeout(() => {
+      document.documentElement.style.removeProperty('--dur');
+      history.replaceState({}, '', location.pathname);
+    }, 320);
+  });
+})();
+</script>
+</body>
+</html>
