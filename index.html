@@ -575,14 +575,24 @@ body.lang-en .item-sub{font-size:11px}
     flex-direction:row;
     align-items:center;
     justify-content:flex-start;
-    padding:28px 20px;
+    padding:56px 20px 16px;
     gap:10px;
     height:100%;
     overflow-y:auto;
     -webkit-overflow-scrolling:touch;
   }
 
-  .sec-logo{height:36px;width:auto;max-width:80px;flex-shrink:0}
+  .sec-logo{
+    position:absolute;
+    top:12px;
+    left:50%;
+    transform:translateX(-50%);
+    height:32px;
+    width:auto;
+    max-width:100px;
+    flex-shrink:0;
+    z-index:3;
+  }
 
   .sec-text{
     display:flex;
