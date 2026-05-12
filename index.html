@@ -818,25 +818,23 @@ body.lang-en .item-sub{font-size:11px}
   });
 
   function expandSection(e, name) {
-    // تجاهل الضغط إذا كان هناك expand جارٍ
     if (isExpanded) return;
     isExpanded = true;
 
     const page = document.getElementById('page');
-    const secId = name === 'cool' ? 'secCool' : 'secVeh';
-    const sec = document.getElementById(secId);
+    const sec  = document.getElementById(name === 'cool' ? 'secCool' : 'secVeh');
+    const target = name === 'cool' ? 'cooling.html' : 'vehicles.html';
 
-    // أخفِ المحتوى الرئيسي فوراً (بدون انتظار)
+    // شغّل animation التوسع الموجودة
     sec.classList.add('is-closing');
-
-    // ابدأ توسيع القسم (width/height transition)
     page.classList.add('expanded-' + name);
 
-    // بعد انتهاء الـ transition أظهر المحتوى الداخلي
+    // بعد انتهاء الـ animation انتقل للصفحة الجديدة
     setTimeout(() => {
-      sec.classList.remove('is-closing');
-      sec.classList.add('is-expanded');
-    }, 420);
+      document.body.style.transition = 'opacity .3s ease';
+      document.body.style.opacity = '0';
+      setTimeout(() => { window.location.href = target; }, 290);
+    }, 370);
   }
 
   function collapseAll(e) {
